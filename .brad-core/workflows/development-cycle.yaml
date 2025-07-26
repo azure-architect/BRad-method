@@ -1,22 +1,20 @@
 name: Development Cycle Workflow
-description: Orchestrate complete development cycles from task assignment to deployment
-version: "1.0.0"
+description: Simplified development cycle from task planning to deployment with Notion tracking
+version: "2.0.0"
 
 metadata:
   workflow_id: development-cycle
   category: development
   estimated_duration: "Variable (1 hour to several days)"
   required_agents:
-    - project-manager-agent
     - notion-agent
     - github-agent
-    - resource-agent
+    - project-manager-agent
 
 trigger:
   command: "*start-development-cycle"
   required_params:
-    - project_id
-    - cycle_type  # feature, bugfix, release, hotfix
+    - task_id
   optional_params:
     - assignee
     - priority
@@ -28,310 +26,178 @@ variables:
       branch_prefix: "feature/"
       review_requirements: 2
       testing_required: true
-      deployment_stage: development
     
     bugfix:
       branch_prefix: "bugfix/"
       review_requirements: 1
       testing_required: true
-      deployment_stage: development
-    
-    release:
-      branch_prefix: "release/"
-      review_requirements: 3
-      testing_required: true
-      deployment_stage: staging
     
     hotfix:
       branch_prefix: "hotfix/"
       review_requirements: 2
       testing_required: true
-      deployment_stage: production
 
 stages:
   - stage: "planning"
-    name: "Development Planning"
-    agent: project-manager-agent
+    name: "Task Breakdown in Notion"
+    agent: notion-agent
+    description: "Plan and organize development work in Notion"
     tasks:
-      - task: analyze_requirements
-        description: "Analyze task requirements and break down into subtasks"
+      - task: load_task_details
+        description: "Load task from Notion and analyze requirements"
         inputs:
-          - project_id
-          - task_description
-          - cycle_type
+          - task_id
+          - related_project_context
         outputs:
-          - task_breakdown
-          - estimated_effort
-          - dependencies
+          - task_details
+          - requirements_analysis
+          - complexity_assessment
         
-      - task: assign_resources
-        description: "Assign team members and allocate resources"
+      - task: break_down_subtasks
+        description: "Create subtasks in Notion if needed for complex work"
         inputs:
-          - task_breakdown
-          - team_availability
-          - resource_requirements
+          - task_details
+          - complexity_assessment
         outputs:
-          - resource_allocation
-          - team_assignments
-          - timeline
+          - subtask_list
+          - subtask_ids
+          - work_breakdown
         
-      - task: validate_prerequisites
-        description: "Ensure all prerequisites are met before development"
+      - task: update_task_status_and_assignment
+        description: "Mark task as In Progress and confirm assignment"
         inputs:
-          - dependencies
-          - resource_allocation
+          - task_id
+          - assignee
+          - estimated_timeline
         outputs:
-          - prerequisite_status
-          - blocking_issues
+          - task_updated
+          - progress_tracking_initialized
+          - notion_status_set
 
-  - stage: "environment_setup"
-    name: "Development Environment Setup"
+  - stage: "development"
+    name: "Code + Update Notion Progress"
     agent: github-agent
     depends_on: planning
+    description: "Active development with real-time Notion progress updates"
     tasks:
-      - task: create_feature_branch
-        description: "Create development branch from appropriate base"
+      - task: create_development_branch
+        description: "Create feature/bugfix branch and set up development environment"
         inputs:
+          - task_details
           - project_repository
-          - cycle_type
-          - task_name
+          - branch_naming_convention
         outputs:
           - branch_name
           - branch_url
+          - development_environment_ready
         
-      - task: setup_development_environment
-        description: "Prepare local development environment"
+      - task: implement_and_track
+        description: "Execute development work with progress tracking"
         inputs:
-          - branch_name
-          - project_dependencies
+          - task_details
+          - work_breakdown
+          - coding_standards
         outputs:
-          - environment_status
-          - setup_instructions
+          - implementation_progress
+          - code_commits
+          - notion_progress_updates
+        progress_tracking:
+          - update_notion_percentage: "Update task progress percentage in real-time"
+          - log_time_spent: "Track actual time spent vs estimates"
+          - note_blockers: "Document any blockers or issues encountered"
+          - update_status: "Keep Notion task status current"
         
-      - task: create_pull_request_draft
-        description: "Create draft PR for tracking development progress"
+      - task: create_pull_request
+        description: "Create PR when development is complete"
         inputs:
           - branch_name
-          - task_description
-          - task_breakdown
+          - implementation_progress
+          - task_details
         outputs:
           - pull_request_id
           - pull_request_url
+          - pr_description_with_notion_links
 
-  - stage: "development"
-    name: "Active Development"
-    agent: github-agent
-    depends_on: environment_setup
-    tasks:
-      - task: implement_changes
-        description: "Execute development work according to requirements"
-        inputs:
-          - task_breakdown
-          - coding_standards
-          - architecture_guidelines
-        outputs:
-          - implementation_status
-          - code_metrics
-        
-      - task: write_tests
-        description: "Create comprehensive tests for implemented changes"
-        inputs:
-          - implementation_status
-          - testing_requirements
-        outputs:
-          - test_coverage
-          - test_results
-        
-      - task: update_documentation
-        description: "Update relevant documentation for changes"
-        inputs:
-          - implementation_status
-          - documentation_requirements
-        outputs:
-          - documentation_updates
-          - documentation_status
-
-  - stage: "quality_assurance"
-    name: "Quality Assurance"
-    agent: github-agent
-    depends_on: development
-    tasks:
-      - task: run_automated_tests
-        description: "Execute full test suite and quality checks"
-        inputs:
-          - test_coverage
-          - quality_gates
-        outputs:
-          - test_results
-          - quality_metrics
-          - security_scan_results
-        
-      - task: code_review_preparation
-        description: "Prepare code for peer review"
-        inputs:
-          - implementation_status
-          - coding_standards
-        outputs:
-          - review_checklist
-          - code_analysis
-        
-      - task: update_pull_request
-        description: "Convert draft PR to ready for review"
-        inputs:
-          - pull_request_id
-          - test_results
-          - documentation_updates
-        outputs:
-          - review_ready_status
-          - review_assignments
-
-  - stage: "review_and_approval"
-    name: "Code Review and Approval"
+  - stage: "review"
+    name: "PR Review + Notion Status Sync"
     agent: project-manager-agent
-    depends_on: quality_assurance
+    depends_on: development
+    description: "Coordinate code review process and sync status with Notion"
     tasks:
-      - task: coordinate_reviews
-        description: "Manage code review process and approvals"
+      - task: coordinate_code_review
+        description: "Manage PR review process with required approvals"
         inputs:
           - pull_request_id
           - review_requirements
+          - task_complexity
+        outputs:
           - review_assignments
-        outputs:
           - review_status
-          - approval_status
-          - feedback_summary
+          - approval_tracking
         
-      - task: address_feedback
-        description: "Coordinate addressing review feedback"
+      - task: sync_review_status_to_notion
+        description: "Update Notion task status to reflect review stage"
         inputs:
-          - feedback_summary
+          - task_id
           - review_status
+          - pull_request_url
         outputs:
-          - feedback_resolution
-          - updated_implementation
+          - notion_status_updated
+          - review_progress_tracked
         
-      - task: final_approval
-        description: "Obtain final approval for merge"
+      - task: handle_review_feedback
+        description: "Coordinate addressing any review feedback"
         inputs:
-          - approval_status
-          - quality_metrics
-        outputs:
-          - merge_approval
-          - deployment_clearance
-
-  - stage: "integration"
-    name: "Code Integration"
-    agent: github-agent
-    depends_on: review_and_approval
-    tasks:
-      - task: merge_changes
-        description: "Merge approved changes to target branch"
-        inputs:
+          - review_feedback
           - pull_request_id
-          - merge_approval
-          - target_branch
         outputs:
-          - merge_status
-          - merge_commit_hash
-        
-      - task: run_integration_tests
-        description: "Execute integration tests after merge"
-        inputs:
-          - merge_commit_hash
-          - integration_test_suite
-        outputs:
-          - integration_test_results
-          - build_status
-        
-      - task: tag_release
-        description: "Create release tag if applicable"
-        inputs:
-          - cycle_type
-          - merge_commit_hash
-          - version_number
-        outputs:
-          - release_tag
-          - release_notes
-        condition:
-          - cycle_type: ["release", "hotfix"]
+          - feedback_addressed
+          - final_approval_status
+          - merge_ready_confirmation
 
   - stage: "deployment"
-    name: "Deployment and Verification"
-    agent: resource-agent
-    depends_on: integration
+    name: "Deploy + Mark Complete in Notion"
+    agent: github-agent
+    depends_on: review
+    description: "Deploy changes and finalize task completion in Notion"
     tasks:
-      - task: deploy_to_environment
-        description: "Deploy changes to appropriate environment"
+      - task: merge_and_deploy
+        description: "Merge PR and deploy to appropriate environment"
         inputs:
-          - deployment_stage
-          - merge_commit_hash
-          - deployment_configuration
+          - pull_request_id
+          - final_approval_status
+          - deployment_target
         outputs:
+          - merge_status
           - deployment_status
           - deployment_url
-          - deployment_logs
         
-      - task: run_smoke_tests
-        description: "Execute smoke tests in deployed environment"
+      - task: verify_deployment
+        description: "Run basic verification tests"
         inputs:
           - deployment_url
-          - smoke_test_suite
+          - verification_checklist
         outputs:
-          - smoke_test_results
-          - environment_health
+          - verification_results
+          - deployment_health
         
-      - task: monitor_deployment
-        description: "Monitor deployment health and performance"
+      - task: complete_notion_task
+        description: "Mark task as complete and update all related records"
         inputs:
-          - deployment_url
-          - monitoring_configuration
-        outputs:
-          - performance_metrics
-          - error_rates
-          - health_status
-
-  - stage: "completion"
-    name: "Cycle Completion"
-    agent: project-manager-agent
-    depends_on: deployment
-    tasks:
-      - task: update_project_status
-        description: "Update project and task status in Notion"
-        inputs:
-          - project_id
-          - task_ids
+          - task_id
           - deployment_status
+          - pull_request_url
+          - actual_time_spent
         outputs:
-          - notion_updates
-          - project_progress
-        
-      - task: generate_cycle_report
-        description: "Create development cycle completion report"
-        inputs:
-          - cycle_metrics
-          - deployment_status
-          - team_performance
-        outputs:
-          - cycle_report
-          - lessons_learned
-        
-      - task: cleanup_resources
-        description: "Clean up temporary resources and environments"
-        inputs:
-          - temporary_resources
-          - cleanup_configuration
-        outputs:
-          - cleanup_status
-          - resource_savings
-        
-      - task: notify_stakeholders
-        description: "Notify relevant stakeholders of completion"
-        inputs:
-          - stakeholder_list
-          - cycle_report
-          - deployment_url
-        outputs:
-          - notification_status
+          - task_marked_complete
+          - project_progress_updated
+          - completion_summary
+        completion_actions:
+          - set_status_complete: "Update task status to Complete"
+          - record_actual_hours: "Log actual time spent vs estimated"
+          - add_completion_notes: "Add notes about deployment and any lessons learned"
+          - link_pr_and_deployment: "Link to PR and deployment URLs"
+          - update_project_progress: "Update overall project completion percentage"
 
 quality_gates:
   code_quality:

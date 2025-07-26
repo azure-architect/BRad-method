@@ -1,16 +1,15 @@
 name: Project Initiation Workflow
-description: Complete end-to-end project setup with Notion, GitHub, and resource provisioning
-version: "1.0.0"
+description: Streamlined end-to-end project setup with Notion, GitHub, and resource provisioning
+version: "2.0.0"
 
 metadata:
   workflow_id: project-initiation
   category: project-management
-  estimated_duration: "30-45 minutes"
+  estimated_duration: "15-30 minutes"
   required_agents:
     - project-manager-agent
     - notion-agent
     - github-agent
-    - resource-agent
   
 trigger:
   command: "*create-project"
@@ -23,214 +22,183 @@ trigger:
 
 stages:
   - stage: "validation"
-    name: "Project Requirements Validation"
+    name: "Quick Requirements Check"
     agent: project-manager-agent
+    description: "Semi-detailed validation to ensure we have everything needed"
     tasks:
-      - task: validate_project_requirements
-        description: "Validate and gather complete project requirements"
+      - task: validate_core_requirements
+        description: "Check essential project parameters"
         inputs:
           - project_type
           - project_name
           - description
-          - team_members
-          - infrastructure_needs
         outputs:
           - validated_requirements
           - project_scope
-        error_handling:
-          - missing_requirements: "Prompt user for missing information"
-          - invalid_type: "Show available project types"
+        validation_checks:
+          - project_type_exists: "Verify project type is supported (web-app, api-service, data-pipeline, infrastructure)"
+          - name_availability: "Check project name availability in GitHub org and Notion"
+          - description_quality: "Ensure description is clear and actionable"
+          - resource_feasibility: "Quick check if infrastructure requirements are reasonable"
+        
+      - task: gather_optional_details
+        description: "Collect additional project details if not provided"
+        inputs:
+          - team_members
+          - budget_constraints
+          - timeline_requirements
+          - compliance_needs
+        outputs:
+          - complete_requirements
+          - planning_parameters
+        prompts:
+          - team_assignment: "Who should be assigned to this project?"
+          - infrastructure_needs: "Will this project need dedicated infrastructure?"
+          - integration_requirements: "Any specific integrations or external dependencies?"
     
   - stage: "notion_setup"
-    name: "Notion Database Setup"
+    name: "Create Project + Initial Tasks"
     agent: notion-agent
     depends_on: validation
+    description: "Detailed Notion setup - the heart of project organization"
     tasks:
-      - task: create_project_entry
-        description: "Create project in Notion Projects database"
+      - task: create_main_project_entry
+        description: "Create master project record in Projects database"
         inputs:
+          - complete_requirements
           - validated_requirements
         outputs:
           - project_id
           - notion_project_url
+        notion_fields:
+          - name: "Project title from requirements"
+          - type: "Project type (web-app, api-service, etc.)"
+          - status: "Planning"
+          - priority: "From requirements or default Medium"
+          - description: "Rich text description"
+          - team: "Multi-select team members"
+          - created_date: "Auto-populated"
+          - estimated_completion: "Based on project type defaults"
         
-      - task: generate_initial_tasks
-        description: "Create initial task breakdown based on project type"
+      - task: generate_task_breakdown
+        description: "Create comprehensive initial task list based on project type template"
         inputs:
           - project_id
           - project_type
+          - planning_parameters
         outputs:
           - task_list
           - task_ids
+          - task_dependencies
+        task_creation_strategy:
+          - use_project_template: "Load task template for project type"
+          - customize_tasks: "Adapt tasks based on specific requirements"
+          - set_priorities: "Assign priorities based on project timeline"
+          - establish_dependencies: "Link tasks with proper sequencing"
+          - assign_estimates: "Add time estimates from templates"
         
-      - task: create_project_documentation
-        description: "Create initial project documentation in Notes database"
+      - task: create_project_documentation_hub
+        description: "Set up project documentation structure in Notes database"
         inputs:
           - project_id
           - project_scope
+          - complete_requirements
         outputs:
-          - documentation_id
-          - documentation_url
+          - documentation_hub_id
+          - documentation_structure
+          - initial_docs_created
+        documentation_setup:
+          - project_overview: "Main project description and goals"
+          - technical_specs: "Technical requirements and architecture notes"
+          - meeting_notes: "Template for project meetings"
+          - decision_log: "Track important project decisions"
+          - resource_links: "Links to external resources and dependencies"
+        
+      - task: establish_project_relationships
+        description: "Link project to related tasks and documentation"
+        inputs:
+          - project_id
+          - task_ids
+          - documentation_hub_id
+        outputs:
+          - relationship_mapping
+          - cross_references_created
+        relationship_types:
+          - project_to_tasks: "Bidirectional linking between project and all tasks"
+          - project_to_docs: "Link project to documentation hub"
+          - task_to_docs: "Link relevant tasks to specific documentation"
+          - dependency_chains: "Establish task dependency relationships"
 
   - stage: "github_setup"
-    name: "GitHub Repository Setup"
+    name: "Repo Creation (if needed)"
     agent: github-agent
     depends_on: notion_setup
     condition:
       - github_repo_requested: true
+    description: "Simple GitHub repository setup when code repository is needed"
     tasks:
       - task: create_repository
-        description: "Create GitHub repository with proper template"
+        description: "Create GitHub repository with appropriate template"
         inputs:
           - project_name
           - project_type
           - description
+          - github_org
         outputs:
           - repository_url
           - repository_id
+          - clone_url
         
-      - task: setup_repository_structure
-        description: "Initialize repository with template structure"
+      - task: initialize_repository
+        description: "Set up basic repository structure and settings"
         inputs:
           - repository_id
           - project_type
         outputs:
-          - initial_commit_hash
-          - branch_structure
-        
-      - task: configure_repository_settings
-        description: "Set up branch protection, workflows, and integrations"
-        inputs:
-          - repository_id
-        outputs:
-          - protection_rules
-          - workflow_files
-        
-      - task: clone_local_repository
-        description: "Clone repository to local development environment"
-        inputs:
-          - repository_url
-          - project_name
-        outputs:
-          - local_path
-          - clone_status
+          - initial_structure_created
+          - default_branch_configured
+          - basic_workflows_added
 
-  - stage: "resource_provisioning"
-    name: "Infrastructure Resource Provisioning"
-    agent: resource-agent
-    depends_on: notion_setup
-    condition:
-      - infrastructure_required: true
-    tasks:
-      - task: assess_resource_requirements
-        description: "Analyze infrastructure needs based on project type"
-        inputs:
-          - project_type
-          - infrastructure_needs
-          - team_size
-        outputs:
-          - resource_specification
-          - estimated_costs
-        
-      - task: allocate_resources
-        description: "Provision required infrastructure resources"
-        inputs:
-          - resource_specification
-          - project_id
-        outputs:
-          - allocated_resources
-          - resource_endpoints
-          - access_credentials
-        
-      - task: configure_networking
-        description: "Set up networking and security for allocated resources"
-        inputs:
-          - allocated_resources
-          - project_security_requirements
-        outputs:
-          - network_configuration
-          - security_settings
-        
-      - task: setup_monitoring
-        description: "Configure monitoring and alerting for resources"
-        inputs:
-          - allocated_resources
-        outputs:
-          - monitoring_endpoints
-          - alert_configurations
-
-  - stage: "integration"
-    name: "Cross-System Integration"
+  - stage: "finalization"
+    name: "Link Everything Together"
     agent: project-manager-agent
     depends_on: 
       - notion_setup
       - github_setup
-      - resource_provisioning
+    description: "Connect all systems and finalize project setup"
     tasks:
-      - task: link_systems
-        description: "Create bidirectional links between Notion, GitHub, and resources"
+      - task: link_notion_and_github
+        description: "Create bidirectional links between Notion project and GitHub repo"
         inputs:
           - project_id
           - repository_url
-          - allocated_resources
+          - notion_project_url
         outputs:
           - integration_status
-          - sync_configuration
+          - cross_reference_links
         
-      - task: setup_automation
-        description: "Configure hooks and automation between systems"
-        inputs:
-          - project_id
-          - repository_id
-          - allocated_resources
-        outputs:
-          - hook_configurations
-          - automation_status
-        
-      - task: validate_integration
-        description: "Test all integrations and automations"
-        inputs:
-          - integration_status
-          - hook_configurations
-        outputs:
-          - validation_results
-          - integration_health
-
-  - stage: "finalization"
-    name: "Project Finalization"
-    agent: project-manager-agent
-    depends_on: integration
-    tasks:
       - task: generate_project_summary
         description: "Create comprehensive project setup summary"
         inputs:
           - project_id
           - notion_project_url
           - repository_url
-          - allocated_resources
           - task_list
+          - documentation_structure
         outputs:
           - project_summary
           - access_information
-          - next_steps
+          - next_steps_guide
         
-      - task: notify_stakeholders
+      - task: notify_team
         description: "Send project setup notifications to team members"
         inputs:
           - team_members
           - project_summary
           - access_information
         outputs:
-          - notification_status
-        
-      - task: schedule_kickoff
-        description: "Schedule project kickoff meeting and initial planning session"
-        inputs:
-          - team_members
-          - project_timeline
-        outputs:
-          - kickoff_meeting
-          - planning_session
+          - notification_sent
+          - team_access_confirmed
 
 success_criteria:
   - notion_project_created: true

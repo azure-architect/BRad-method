@@ -21,6 +21,7 @@ notion:
     tasks: "${NOTION_TASKS_DB_ID}" 
     notes: "${NOTION_NOTES_DB_ID}"
     resources: "${NOTION_RESOURCES_DB_ID}"     # Infrastructure resources
+    videos: "${NOTION_VIDEOS_DB_ID}"           # Video clips library
   sync_interval: 30  # seconds between auto-syncs
 
 # GitHub Integration  

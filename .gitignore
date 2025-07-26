@@ -1,0 +1,29 @@
+# Environment variables and sensitive configuration
+.env
+.env.local
+.env.production
+
+# Claude Code session logs
+.claude/logs/
+.claude/transcripts/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project specific
+node_modules/
+dist/
+build/
+*.log
