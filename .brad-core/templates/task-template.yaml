@@ -1,0 +1,384 @@
+name: Task Template
+description: Standard template for creating tasks in the BRad Method system
+version: "1.0.0"
+
+metadata:
+  template_id: task-template
+  category: task-management
+  applicable_task_types:
+    - development
+    - testing
+    - deployment
+    - documentation
+    - design
+    - review
+    - setup
+    - maintenance
+
+# Basic Task Information Template
+task_info:
+  name: "${TASK_NAME}"
+  description: "${TASK_DESCRIPTION}"
+  type: "${TASK_TYPE}"
+  project_id: "${PROJECT_ID}"
+  status: "Not Started"
+  priority: "${TASK_PRIORITY}"
+  created_date: "${CURRENT_DATE}"
+  due_date: "${DUE_DATE}"
+  estimated_hours: "${ESTIMATED_HOURS}"
+  assignee: "${ASSIGNEE}"
+  
+# Task Categorization
+categorization:
+  component: "${COMPONENT}"  # frontend, backend, database, infrastructure, etc.
+  feature: "${FEATURE}"      # specific feature or area of functionality
+  epic: "${EPIC}"           # larger epic this task belongs to
+  sprint: "${SPRINT}"       # sprint or iteration
+  tags: "${TAGS}"           # additional tags for filtering
+
+# Dependencies and Relationships
+relationships:
+  parent_task: "${PARENT_TASK_ID}"
+  dependencies: "${DEPENDENCY_TASK_IDS}"
+  blocks: "${BLOCKED_TASK_IDS}"
+  related_tasks: "${RELATED_TASK_IDS}"
+  subtasks: "${SUBTASK_IDS}"
+
+# Acceptance Criteria Template
+acceptance_criteria:
+  - criterion: "Define what constitutes successful completion"
+    type: "functional"
+    testable: true
+  - criterion: "Define performance requirements if applicable"
+    type: "performance"
+    testable: true
+  - criterion: "Define quality requirements"
+    type: "quality"
+    testable: true
+
+# Definition of Done Template
+definition_of_done:
+  development:
+    - "Code written and follows coding standards"
+    - "Unit tests written and passing"
+    - "Code review completed and approved"
+    - "Integration tests passing"
+    - "Documentation updated"
+  
+  testing:
+    - "Test cases written and documented"
+    - "Tests executed and results documented"
+    - "Defects identified and logged"
+    - "Test coverage meets requirements"
+    - "Test artifacts delivered"
+  
+  deployment:
+    - "Deployment scripts tested"
+    - "Environment configuration validated"
+    - "Application deployed successfully"
+    - "Smoke tests passing"
+    - "Rollback procedure validated"
+  
+  documentation:
+    - "Documentation written and reviewed"
+    - "Technical accuracy validated"
+    - "Stakeholder approval obtained"
+    - "Documentation published"
+    - "Version control updated"
+
+# Task Templates by Type
+task_type_templates:
+  development:
+    checklist:
+      - "Requirements analyzed and understood"
+      - "Technical approach defined"
+      - "Code implementation completed"
+      - "Unit tests written and passing"
+      - "Code review requested and approved"
+      - "Integration testing completed"
+      - "Documentation updated"
+      - "Code merged to target branch"
+    
+    estimated_effort:
+      simple: "2-4 hours"
+      medium: "1-2 days"
+      complex: "3-5 days"
+      very_complex: "1-2 weeks"
+    
+    required_skills:
+      - "${PRIMARY_TECHNOLOGY}"
+      - "${SECONDARY_TECHNOLOGY}"
+      - "Testing frameworks"
+      - "Version control (Git)"
+
+  testing:
+    checklist:
+      - "Test plan created and reviewed"
+      - "Test cases designed and documented"
+      - "Test environment prepared"
+      - "Test data prepared"
+      - "Tests executed"
+      - "Results documented"
+      - "Defects logged and tracked"
+      - "Test artifacts delivered"
+    
+    test_types:
+      - unit_testing
+      - integration_testing
+      - system_testing
+      - acceptance_testing
+      - performance_testing
+      - security_testing
+    
+    deliverables:
+      - "Test plan document"
+      - "Test cases and scripts"
+      - "Test execution results"
+      - "Defect reports"
+      - "Test coverage report"
+
+  deployment:
+    checklist:
+      - "Deployment plan created and reviewed"
+      - "Environment prerequisites verified"
+      - "Deployment scripts prepared and tested"
+      - "Backup procedures verified"
+      - "Rollback procedures prepared"
+      - "Deployment executed"
+      - "Post-deployment verification completed"
+      - "Documentation updated"
+    
+    environments:
+      - development
+      - testing
+      - staging
+      - production
+    
+    verification_steps:
+      - "Application starts successfully"
+      - "Core functionality working"
+      - "Database connectivity verified"
+      - "External integrations working"
+      - "Performance within acceptable limits"
+
+  documentation:
+    checklist:
+      - "Content outline created and approved"
+      - "Draft documentation written"
+      - "Technical review completed"
+      - "Stakeholder review completed"
+      - "Feedback incorporated"
+      - "Final version approved"
+      - "Documentation published"
+      - "Version control updated"
+    
+    document_types:
+      - technical_specification
+      - user_guide
+      - api_documentation
+      - installation_guide
+      - troubleshooting_guide
+      - architecture_document
+    
+    quality_criteria:
+      - "Technically accurate"
+      - "Clear and concise"
+      - "Well structured"
+      - "Up to date"
+      - "Accessible to target audience"
+
+# Resource Requirements Template
+resource_requirements:
+  human_resources:
+    primary_assignee: "${ASSIGNEE}"
+    required_skills: "${REQUIRED_SKILLS}"
+    estimated_effort: "${ESTIMATED_HOURS}"
+    review_requirements: "${REVIEW_REQUIREMENTS}"
+  
+  technical_resources:
+    development_environment: "${DEV_ENVIRONMENT}"
+    testing_environment: "${TEST_ENVIRONMENT}"
+    tools_required: "${TOOLS_REQUIRED}"
+    access_requirements: "${ACCESS_REQUIREMENTS}"
+  
+  external_dependencies:
+    third_party_services: "${THIRD_PARTY_SERVICES}"
+    external_apis: "${EXTERNAL_APIS}"
+    vendor_dependencies: "${VENDOR_DEPENDENCIES}"
+    stakeholder_input: "${STAKEHOLDER_INPUT}"
+
+# Risk Assessment Template
+risk_assessment:
+  technical_risks:
+    - risk: "Technology complexity"
+      probability: "medium"
+      impact: "high"
+      mitigation: "Proof of concept and research"
+    - risk: "Integration challenges"
+      probability: "low"
+      impact: "medium"
+      mitigation: "Early integration testing"
+  
+  resource_risks:
+    - risk: "Assignee availability"
+      probability: "medium"
+      impact: "high"
+      mitigation: "Backup assignee identified"
+    - risk: "Skill gap"
+      probability: "low"
+      impact: "medium"
+      mitigation: "Training or mentoring provided"
+  
+  timeline_risks:
+    - risk: "Underestimated complexity"
+      probability: "medium"
+      impact: "high"
+      mitigation: "Buffer time included in estimates"
+    - risk: "Dependency delays"
+      probability: "medium"
+      impact: "medium"
+      mitigation: "Regular dependency status checks"
+
+# Progress Tracking Template
+progress_tracking:
+  status_updates:
+    frequency: "daily"  # daily, weekly, on_milestone
+    required_fields:
+      - progress_percentage
+      - time_spent
+      - remaining_effort
+      - blockers
+      - next_steps
+  
+  milestones:
+    - name: "Requirements Finalized"
+      percentage: 10
+      deliverables: ["Requirements document"]
+    - name: "Design Completed"
+      percentage: 25
+      deliverables: ["Technical design", "Review approval"]
+    - name: "Implementation Done"
+      percentage: 70
+      deliverables: ["Working code", "Unit tests"]
+    - name: "Testing Completed"
+      percentage: 90
+      deliverables: ["Test results", "Quality gates passed"]
+    - name: "Task Completed"
+      percentage: 100
+      deliverables: ["All acceptance criteria met"]
+
+# Quality Gates Template
+quality_gates:
+  code_quality:
+    - gate: "Code Review"
+      required: true
+      criteria:
+        - "Code follows style guidelines"
+        - "No critical issues identified"
+        - "Architecture patterns followed"
+        - "Security considerations addressed"
+  
+  testing_quality:
+    - gate: "Unit Test Coverage"
+      required: true
+      criteria:
+        - "Minimum 80% code coverage"
+        - "All tests passing"
+        - "No test flakiness"
+        - "Edge cases covered"
+  
+  documentation_quality:
+    - gate: "Documentation Review"
+      required: true
+      criteria:
+        - "Technical accuracy verified"
+        - "Completeness validated"
+        - "Readability confirmed"
+        - "Examples provided where needed"
+
+# Communication Template
+communication:
+  status_reporting:
+    frequency: "${REPORTING_FREQUENCY}"
+    recipients: "${REPORT_RECIPIENTS}"
+    format: "standard_template"
+    channels: ["notion", "email", "slack"]
+  
+  escalation_procedures:
+    - level: "Team Lead"
+      condition: "Blocked for > 1 day"
+      contact: "${TEAM_LEAD}"
+    - level: "Project Manager"
+      condition: "Blocked for > 3 days"
+      contact: "${PROJECT_MANAGER}"
+    - level: "Department Head"
+      condition: "Critical issue impacting timeline"
+      contact: "${DEPARTMENT_HEAD}"
+  
+  stakeholder_updates:
+    frequency: "milestone_based"
+    content:
+      - progress_summary
+      - completed_deliverables
+      - upcoming_milestones
+      - issues_and_risks
+
+# Integration Points Template
+integration_points:
+  github_integration:
+    issue_linking: true
+    branch_naming: "feature/${TASK_ID}-${TASK_NAME_SLUG}"
+    commit_message_format: "${TASK_ID}: Brief description of changes"
+    pr_title_format: "${TASK_ID}: ${TASK_NAME}"
+    labels: "${GITHUB_LABELS}"
+  
+  notion_integration:
+    database_fields:
+      - task_name
+      - status
+      - progress_percentage
+      - assignee
+      - due_date
+      - estimated_hours
+      - actual_hours
+    sync_frequency: "real_time"
+    notification_triggers:
+      - status_change
+      - assignment_change
+      - due_date_approach
+  
+  resource_integration:
+    resource_allocation: true
+    usage_tracking: true
+    cost_attribution: true
+    performance_monitoring: true
+
+# Automation Template
+automation:
+  triggers:
+    - event: "task_created"
+      actions:
+        - "create_github_issue"
+        - "assign_default_reviewers"
+        - "set_initial_labels"
+    - event: "status_changed_to_in_progress"
+      actions:
+        - "create_feature_branch"
+        - "notify_stakeholders"
+        - "start_time_tracking"
+    - event: "status_changed_to_complete"
+      actions:
+        - "update_project_progress"
+        - "notify_dependent_tasks"
+        - "generate_completion_report"
+  
+  notifications:
+    - trigger: "task_overdue"
+      recipients: ["assignee", "team_lead"]
+      message: "Task ${TASK_NAME} is overdue"
+    - trigger: "dependency_completed"
+      recipients: ["assignee"]
+      message: "Dependency completed, ${TASK_NAME} can now start"
+    - trigger: "quality_gate_failed"
+      recipients: ["assignee", "reviewer"]
+      message: "Quality gate failed for ${TASK_NAME}"

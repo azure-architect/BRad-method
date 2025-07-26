@@ -1,0 +1,108 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(black *)",
+      "Bash(pytest *)",
+      "Bash(mypy *)",
+      "Bash(pylint *)",
+      "Bash(isort *)",
+      "Bash(docker *)",
+      "Bash(mkdir -p *)",
+      "Bash(touch *)",
+      "Bash(git *)"
+    ],
+    "additionalDirectories": [
+      "./docs/tasks/"
+    ]
+  },
+  "env": {
+    "PYTHONPATH": "${PYTHONPATH}:${PWD}/src"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "filePattern": "*.py",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/python/pre_tool_use.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "filePattern": "*.js|*.jsx",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/javascript/pre_tool_use.js"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "filePattern": "*.php",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "php .claude/hooks/php/pre_tool_use.php"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "filePattern": "*.yml|*.yaml",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/yaml_validator.py"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "filePattern": "*.py",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/python/post_tool_use.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "filePattern": "*.js|*.jsx",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/javascript/post_tool_use.js"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "filePattern": "*.php",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "php .claude/hooks/php/post_tool_use.php"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/stop.py"
+          }
+        ]
+      }
+    ]
+  }
+}

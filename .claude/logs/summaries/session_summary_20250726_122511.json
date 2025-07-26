@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-07-26T12:25:11.078168",
+  "session_duration_seconds": null,
+  "message_count": 38,
+  "system_state": {
+    "timestamp": "2025-07-26T12:25:11.076303",
+    "memory_usage_mb": 17.359375,
+    "cpu_percent": 0.0,
+    "open_files": 0,
+    "threads": 1,
+    "system_time": 1753503911.0763562
+  },
+  "artifacts_generated": 0,
+  "tool_calls_count": 0,
+  "tool_calls_by_type": {},
+  "project_transcript_path": "/Volumes/Samsung/mo/projects/ai-automation/claude-integrations/Brad-method/.claude/logs/transcripts/5a728faf-9c00-436d-9ef9-2a5a6e04bda6.jsonl"
+}

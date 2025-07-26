@@ -1,0 +1,78 @@
+# BRad Method Core Configuration
+brad_method:
+  version: "1.0.0"
+  slash_prefix: "BRad"
+  description: "Notion-integrated development orchestration system"
+
+# Knowledge and Resource Resolution
+knowledge_sources:
+  notion_notes: "Notes Database"                        # Dynamic project knowledge
+  external_docs: "/Volumes/Samsung/mo/knowledge/docs"   # Static tech documentation
+  
+resource_priority:
+  - notion_notes      # Check project-specific knowledge first
+  - external_docs     # Fall back to technical documentation
+
+# Notion Integration
+notion:
+  workspace_id: "${NOTION_WORKSPACE_ID}"
+  databases:
+    projects: "${NOTION_PROJECTS_DB_ID}"
+    tasks: "${NOTION_TASKS_DB_ID}" 
+    notes: "${NOTION_NOTES_DB_ID}"
+    resources: "${NOTION_RESOURCES_DB_ID}"     # Infrastructure resources
+  sync_interval: 30  # seconds between auto-syncs
+
+# GitHub Integration  
+github:
+  organization: "${GITHUB_ORG}"                # Optional: for org repos
+  default_visibility: "private"
+  auto_create_repos: true
+  default_branch: "main"
+  template_repos:
+    web_app: "brad-templates/web-app-starter"
+    api_service: "brad-templates/api-service-starter"
+    
+# Infrastructure (Proxmox)
+infrastructure:
+  proxmox:
+    enabled: true
+    api_url: "${PROXMOX_API_URL}"
+    auto_discover: true
+    sync_resources_to_notion: true
+
+# Hook System
+hooks:
+  notion_sync:
+    enabled: true
+    events: ["task_complete", "project_create", "resource_allocate", "repo_create"]
+  
+  github_sync:
+    enabled: true
+    events: ["project_create", "task_complete"]
+  
+  infrastructure_sync:
+    enabled: true
+    events: ["resource_request", "project_deploy"]
+
+# Agent Behavior
+agents:
+  load_always_files:
+    - "external_docs/notion-api.md"
+    - "external_docs/github-api.md"
+  debug_mode: false
+  max_concurrent_tasks: 3
+
+# Development Settings
+dev_settings:
+  local_project_root: "./projects"
+  auto_clone_repos: true
+  preferred_editor: "vscode"
+  
+# File Paths
+paths:
+  agents: ".brad-core/agents"
+  workflows: ".brad-core/workflows"
+  tasks: ".brad-core/tasks"
+  templates: ".brad-core/templates"
+  hooks: ".brad-core/hooks"

@@ -1,0 +1,302 @@
+name: Project Initiation Workflow
+description: Complete end-to-end project setup with Notion, GitHub, and resource provisioning
+version: "1.0.0"
+
+metadata:
+  workflow_id: project-initiation
+  category: project-management
+  estimated_duration: "30-45 minutes"
+  required_agents:
+    - project-manager-agent
+    - notion-agent
+    - github-agent
+    - resource-agent
+  
+trigger:
+  command: "*create-project"
+  required_params:
+    - project_type
+  optional_params:
+    - project_name
+    - description
+    - team_members
+
+stages:
+  - stage: "validation"
+    name: "Project Requirements Validation"
+    agent: project-manager-agent
+    tasks:
+      - task: validate_project_requirements
+        description: "Validate and gather complete project requirements"
+        inputs:
+          - project_type
+          - project_name
+          - description
+          - team_members
+          - infrastructure_needs
+        outputs:
+          - validated_requirements
+          - project_scope
+        error_handling:
+          - missing_requirements: "Prompt user for missing information"
+          - invalid_type: "Show available project types"
+    
+  - stage: "notion_setup"
+    name: "Notion Database Setup"
+    agent: notion-agent
+    depends_on: validation
+    tasks:
+      - task: create_project_entry
+        description: "Create project in Notion Projects database"
+        inputs:
+          - validated_requirements
+        outputs:
+          - project_id
+          - notion_project_url
+        
+      - task: generate_initial_tasks
+        description: "Create initial task breakdown based on project type"
+        inputs:
+          - project_id
+          - project_type
+        outputs:
+          - task_list
+          - task_ids
+        
+      - task: create_project_documentation
+        description: "Create initial project documentation in Notes database"
+        inputs:
+          - project_id
+          - project_scope
+        outputs:
+          - documentation_id
+          - documentation_url
+
+  - stage: "github_setup"
+    name: "GitHub Repository Setup"
+    agent: github-agent
+    depends_on: notion_setup
+    condition:
+      - github_repo_requested: true
+    tasks:
+      - task: create_repository
+        description: "Create GitHub repository with proper template"
+        inputs:
+          - project_name
+          - project_type
+          - description
+        outputs:
+          - repository_url
+          - repository_id
+        
+      - task: setup_repository_structure
+        description: "Initialize repository with template structure"
+        inputs:
+          - repository_id
+          - project_type
+        outputs:
+          - initial_commit_hash
+          - branch_structure
+        
+      - task: configure_repository_settings
+        description: "Set up branch protection, workflows, and integrations"
+        inputs:
+          - repository_id
+        outputs:
+          - protection_rules
+          - workflow_files
+        
+      - task: clone_local_repository
+        description: "Clone repository to local development environment"
+        inputs:
+          - repository_url
+          - project_name
+        outputs:
+          - local_path
+          - clone_status
+
+  - stage: "resource_provisioning"
+    name: "Infrastructure Resource Provisioning"
+    agent: resource-agent
+    depends_on: notion_setup
+    condition:
+      - infrastructure_required: true
+    tasks:
+      - task: assess_resource_requirements
+        description: "Analyze infrastructure needs based on project type"
+        inputs:
+          - project_type
+          - infrastructure_needs
+          - team_size
+        outputs:
+          - resource_specification
+          - estimated_costs
+        
+      - task: allocate_resources
+        description: "Provision required infrastructure resources"
+        inputs:
+          - resource_specification
+          - project_id
+        outputs:
+          - allocated_resources
+          - resource_endpoints
+          - access_credentials
+        
+      - task: configure_networking
+        description: "Set up networking and security for allocated resources"
+        inputs:
+          - allocated_resources
+          - project_security_requirements
+        outputs:
+          - network_configuration
+          - security_settings
+        
+      - task: setup_monitoring
+        description: "Configure monitoring and alerting for resources"
+        inputs:
+          - allocated_resources
+        outputs:
+          - monitoring_endpoints
+          - alert_configurations
+
+  - stage: "integration"
+    name: "Cross-System Integration"
+    agent: project-manager-agent
+    depends_on: 
+      - notion_setup
+      - github_setup
+      - resource_provisioning
+    tasks:
+      - task: link_systems
+        description: "Create bidirectional links between Notion, GitHub, and resources"
+        inputs:
+          - project_id
+          - repository_url
+          - allocated_resources
+        outputs:
+          - integration_status
+          - sync_configuration
+        
+      - task: setup_automation
+        description: "Configure hooks and automation between systems"
+        inputs:
+          - project_id
+          - repository_id
+          - allocated_resources
+        outputs:
+          - hook_configurations
+          - automation_status
+        
+      - task: validate_integration
+        description: "Test all integrations and automations"
+        inputs:
+          - integration_status
+          - hook_configurations
+        outputs:
+          - validation_results
+          - integration_health
+
+  - stage: "finalization"
+    name: "Project Finalization"
+    agent: project-manager-agent
+    depends_on: integration
+    tasks:
+      - task: generate_project_summary
+        description: "Create comprehensive project setup summary"
+        inputs:
+          - project_id
+          - notion_project_url
+          - repository_url
+          - allocated_resources
+          - task_list
+        outputs:
+          - project_summary
+          - access_information
+          - next_steps
+        
+      - task: notify_stakeholders
+        description: "Send project setup notifications to team members"
+        inputs:
+          - team_members
+          - project_summary
+          - access_information
+        outputs:
+          - notification_status
+        
+      - task: schedule_kickoff
+        description: "Schedule project kickoff meeting and initial planning session"
+        inputs:
+          - team_members
+          - project_timeline
+        outputs:
+          - kickoff_meeting
+          - planning_session
+
+success_criteria:
+  - notion_project_created: true
+  - github_repository_created: true
+  - resources_allocated: true
+  - integrations_configured: true
+  - team_notified: true
+
+rollback_procedures:
+  notion_rollback:
+    - Delete created project entry
+    - Remove generated tasks
+    - Clean up project documentation
+  
+  github_rollback:
+    - Delete created repository
+    - Clean up local clone
+    - Remove webhook configurations
+  
+  resource_rollback:
+    - Deallocate provisioned resources
+    - Clean up network configurations
+    - Remove monitoring setup
+
+error_handling:
+  agent_failure:
+    action: "Continue with other stages, mark failed stage for retry"
+    max_retries: 3
+    escalation: "Notify project manager for manual intervention"
+  
+  resource_shortage:
+    action: "Queue project for later provisioning"
+    notification: "Inform user of delay and expected availability"
+  
+  integration_failure:
+    action: "Complete individual setups, flag integration for manual setup"
+    fallback: "Provide manual integration instructions"
+
+monitoring:
+  workflow_progress:
+    - Stage completion percentage
+    - Task execution time
+    - Error occurrences
+    - Resource utilization
+  
+  success_metrics:
+    - Time to project creation
+    - Integration success rate
+    - User satisfaction score
+    - Resource allocation efficiency
+
+notifications:
+  workflow_start:
+    recipients: [user, project_manager]
+    message: "Project initiation workflow started for {project_name}"
+  
+  stage_completion:
+    recipients: [user]
+    message: "Completed {stage_name} for project {project_name}"
+  
+  workflow_completion:
+    recipients: [user, team_members, project_manager]
+    message: "Project {project_name} successfully initialized"
+    attachments: [project_summary, access_information]
+  
+  workflow_failure:
+    recipients: [user, project_manager]
+    message: "Project initiation failed at {failed_stage}"
+    attachments: [error_log, rollback_summary]

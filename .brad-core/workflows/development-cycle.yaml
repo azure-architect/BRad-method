@@ -1,0 +1,421 @@
+name: Development Cycle Workflow
+description: Orchestrate complete development cycles from task assignment to deployment
+version: "1.0.0"
+
+metadata:
+  workflow_id: development-cycle
+  category: development
+  estimated_duration: "Variable (1 hour to several days)"
+  required_agents:
+    - project-manager-agent
+    - notion-agent
+    - github-agent
+    - resource-agent
+
+trigger:
+  command: "*start-development-cycle"
+  required_params:
+    - project_id
+    - cycle_type  # feature, bugfix, release, hotfix
+  optional_params:
+    - assignee
+    - priority
+    - deadline
+
+variables:
+  cycle_types:
+    feature:
+      branch_prefix: "feature/"
+      review_requirements: 2
+      testing_required: true
+      deployment_stage: development
+    
+    bugfix:
+      branch_prefix: "bugfix/"
+      review_requirements: 1
+      testing_required: true
+      deployment_stage: development
+    
+    release:
+      branch_prefix: "release/"
+      review_requirements: 3
+      testing_required: true
+      deployment_stage: staging
+    
+    hotfix:
+      branch_prefix: "hotfix/"
+      review_requirements: 2
+      testing_required: true
+      deployment_stage: production
+
+stages:
+  - stage: "planning"
+    name: "Development Planning"
+    agent: project-manager-agent
+    tasks:
+      - task: analyze_requirements
+        description: "Analyze task requirements and break down into subtasks"
+        inputs:
+          - project_id
+          - task_description
+          - cycle_type
+        outputs:
+          - task_breakdown
+          - estimated_effort
+          - dependencies
+        
+      - task: assign_resources
+        description: "Assign team members and allocate resources"
+        inputs:
+          - task_breakdown
+          - team_availability
+          - resource_requirements
+        outputs:
+          - resource_allocation
+          - team_assignments
+          - timeline
+        
+      - task: validate_prerequisites
+        description: "Ensure all prerequisites are met before development"
+        inputs:
+          - dependencies
+          - resource_allocation
+        outputs:
+          - prerequisite_status
+          - blocking_issues
+
+  - stage: "environment_setup"
+    name: "Development Environment Setup"
+    agent: github-agent
+    depends_on: planning
+    tasks:
+      - task: create_feature_branch
+        description: "Create development branch from appropriate base"
+        inputs:
+          - project_repository
+          - cycle_type
+          - task_name
+        outputs:
+          - branch_name
+          - branch_url
+        
+      - task: setup_development_environment
+        description: "Prepare local development environment"
+        inputs:
+          - branch_name
+          - project_dependencies
+        outputs:
+          - environment_status
+          - setup_instructions
+        
+      - task: create_pull_request_draft
+        description: "Create draft PR for tracking development progress"
+        inputs:
+          - branch_name
+          - task_description
+          - task_breakdown
+        outputs:
+          - pull_request_id
+          - pull_request_url
+
+  - stage: "development"
+    name: "Active Development"
+    agent: github-agent
+    depends_on: environment_setup
+    tasks:
+      - task: implement_changes
+        description: "Execute development work according to requirements"
+        inputs:
+          - task_breakdown
+          - coding_standards
+          - architecture_guidelines
+        outputs:
+          - implementation_status
+          - code_metrics
+        
+      - task: write_tests
+        description: "Create comprehensive tests for implemented changes"
+        inputs:
+          - implementation_status
+          - testing_requirements
+        outputs:
+          - test_coverage
+          - test_results
+        
+      - task: update_documentation
+        description: "Update relevant documentation for changes"
+        inputs:
+          - implementation_status
+          - documentation_requirements
+        outputs:
+          - documentation_updates
+          - documentation_status
+
+  - stage: "quality_assurance"
+    name: "Quality Assurance"
+    agent: github-agent
+    depends_on: development
+    tasks:
+      - task: run_automated_tests
+        description: "Execute full test suite and quality checks"
+        inputs:
+          - test_coverage
+          - quality_gates
+        outputs:
+          - test_results
+          - quality_metrics
+          - security_scan_results
+        
+      - task: code_review_preparation
+        description: "Prepare code for peer review"
+        inputs:
+          - implementation_status
+          - coding_standards
+        outputs:
+          - review_checklist
+          - code_analysis
+        
+      - task: update_pull_request
+        description: "Convert draft PR to ready for review"
+        inputs:
+          - pull_request_id
+          - test_results
+          - documentation_updates
+        outputs:
+          - review_ready_status
+          - review_assignments
+
+  - stage: "review_and_approval"
+    name: "Code Review and Approval"
+    agent: project-manager-agent
+    depends_on: quality_assurance
+    tasks:
+      - task: coordinate_reviews
+        description: "Manage code review process and approvals"
+        inputs:
+          - pull_request_id
+          - review_requirements
+          - review_assignments
+        outputs:
+          - review_status
+          - approval_status
+          - feedback_summary
+        
+      - task: address_feedback
+        description: "Coordinate addressing review feedback"
+        inputs:
+          - feedback_summary
+          - review_status
+        outputs:
+          - feedback_resolution
+          - updated_implementation
+        
+      - task: final_approval
+        description: "Obtain final approval for merge"
+        inputs:
+          - approval_status
+          - quality_metrics
+        outputs:
+          - merge_approval
+          - deployment_clearance
+
+  - stage: "integration"
+    name: "Code Integration"
+    agent: github-agent
+    depends_on: review_and_approval
+    tasks:
+      - task: merge_changes
+        description: "Merge approved changes to target branch"
+        inputs:
+          - pull_request_id
+          - merge_approval
+          - target_branch
+        outputs:
+          - merge_status
+          - merge_commit_hash
+        
+      - task: run_integration_tests
+        description: "Execute integration tests after merge"
+        inputs:
+          - merge_commit_hash
+          - integration_test_suite
+        outputs:
+          - integration_test_results
+          - build_status
+        
+      - task: tag_release
+        description: "Create release tag if applicable"
+        inputs:
+          - cycle_type
+          - merge_commit_hash
+          - version_number
+        outputs:
+          - release_tag
+          - release_notes
+        condition:
+          - cycle_type: ["release", "hotfix"]
+
+  - stage: "deployment"
+    name: "Deployment and Verification"
+    agent: resource-agent
+    depends_on: integration
+    tasks:
+      - task: deploy_to_environment
+        description: "Deploy changes to appropriate environment"
+        inputs:
+          - deployment_stage
+          - merge_commit_hash
+          - deployment_configuration
+        outputs:
+          - deployment_status
+          - deployment_url
+          - deployment_logs
+        
+      - task: run_smoke_tests
+        description: "Execute smoke tests in deployed environment"
+        inputs:
+          - deployment_url
+          - smoke_test_suite
+        outputs:
+          - smoke_test_results
+          - environment_health
+        
+      - task: monitor_deployment
+        description: "Monitor deployment health and performance"
+        inputs:
+          - deployment_url
+          - monitoring_configuration
+        outputs:
+          - performance_metrics
+          - error_rates
+          - health_status
+
+  - stage: "completion"
+    name: "Cycle Completion"
+    agent: project-manager-agent
+    depends_on: deployment
+    tasks:
+      - task: update_project_status
+        description: "Update project and task status in Notion"
+        inputs:
+          - project_id
+          - task_ids
+          - deployment_status
+        outputs:
+          - notion_updates
+          - project_progress
+        
+      - task: generate_cycle_report
+        description: "Create development cycle completion report"
+        inputs:
+          - cycle_metrics
+          - deployment_status
+          - team_performance
+        outputs:
+          - cycle_report
+          - lessons_learned
+        
+      - task: cleanup_resources
+        description: "Clean up temporary resources and environments"
+        inputs:
+          - temporary_resources
+          - cleanup_configuration
+        outputs:
+          - cleanup_status
+          - resource_savings
+        
+      - task: notify_stakeholders
+        description: "Notify relevant stakeholders of completion"
+        inputs:
+          - stakeholder_list
+          - cycle_report
+          - deployment_url
+        outputs:
+          - notification_status
+
+quality_gates:
+  code_quality:
+    - test_coverage: ">= 80%"
+    - linting_errors: "= 0"
+    - security_vulnerabilities: "= 0"
+    - code_duplication: "< 5%"
+  
+  performance:
+    - build_time: "< 10 minutes"
+    - deployment_time: "< 5 minutes"
+    - response_time: "< 200ms"
+    - memory_usage: "< baseline + 10%"
+  
+  process:
+    - code_reviews: ">= required_reviewers"
+    - documentation_updated: "= true"
+    - tests_passing: "= 100%"
+    - approvals_obtained: "= true"
+
+rollback_procedures:
+  development_rollback:
+    - Revert commits to last stable state
+    - Clean up feature branches
+    - Reset development environment
+  
+  deployment_rollback:
+    - Trigger automated rollback procedure
+    - Restore previous version
+    - Verify rollback success
+    - Update monitoring and alerts
+  
+  database_rollback:
+    - Execute database migration rollback
+    - Restore data consistency
+    - Validate data integrity
+
+error_handling:
+  test_failures:
+    action: "Block progression, require fixes"
+    notification: "Alert development team and project manager"
+    
+  deployment_failures:
+    action: "Initiate rollback procedure"
+    escalation: "Page on-call engineer"
+    
+  quality_gate_failures:
+    action: "Return to previous stage for remediation"
+    notification: "Send quality report to team lead"
+
+monitoring_and_metrics:
+  cycle_metrics:
+    - Cycle time (planning to deployment)
+    - Lead time (request to delivery)
+    - Code quality metrics
+    - Deployment success rate
+    - Rollback frequency
+  
+  team_performance:
+    - Code review turnaround time
+    - Test coverage trends
+    - Bug introduction rate
+    - Feature delivery velocity
+  
+  system_health:
+    - Application performance
+    - Error rates
+    - Resource utilization
+    - User satisfaction
+
+notifications:
+  cycle_start:
+    recipients: [assignee, project_manager, team_lead]
+    message: "Development cycle started for {task_name}"
+  
+  quality_gate_passed:
+    recipients: [assignee, reviewers]
+    message: "Quality gates passed for {task_name}"
+  
+  deployment_success:
+    recipients: [team, stakeholders]
+    message: "Successfully deployed {task_name} to {environment}"
+  
+  cycle_completion:
+    recipients: [project_manager, stakeholders]
+    message: "Development cycle completed for {task_name}"
+    attachments: [cycle_report, performance_metrics]

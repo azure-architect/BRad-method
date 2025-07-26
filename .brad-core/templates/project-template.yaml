@@ -1,0 +1,530 @@
+name: Project Template
+description: Standard template for creating new projects in the BRad Method system
+version: "1.0.0"
+
+metadata:
+  template_id: project-template
+  category: project-management
+  applicable_project_types:
+    - web-app
+    - api-service
+    - data-pipeline
+    - infrastructure
+    - automation-tool
+    - mobile-app
+
+# Project Information Template
+project_info:
+  name: "${PROJECT_NAME}"
+  description: "${PROJECT_DESCRIPTION}"
+  type: "${PROJECT_TYPE}"
+  priority: "${PROJECT_PRIORITY}"
+  status: "Planning"
+  created_date: "${CURRENT_DATE}"
+  estimated_completion: "${ESTIMATED_COMPLETION}"
+  budget: "${PROJECT_BUDGET}"
+  
+# Team Structure Template
+team_structure:
+  project_manager: "${PROJECT_MANAGER}"
+  technical_lead: "${TECHNICAL_LEAD}"
+  developers: "${DEVELOPER_LIST}"
+  qa_engineers: "${QA_ENGINEERS}"
+  devops_engineers: "${DEVOPS_ENGINEERS}"
+  designers: "${DESIGNERS}"
+  stakeholders: "${STAKEHOLDERS}"
+
+# GitHub Configuration Template
+github_config:
+  repository_name: "${REPOSITORY_NAME}"
+  description: "${REPOSITORY_DESCRIPTION}"
+  visibility: "${REPOSITORY_VISIBILITY}"
+  organization: "${GITHUB_ORGANIZATION}"
+  template_type: "${PROJECT_TYPE}"
+  
+  # Branch Strategy
+  branching_strategy: "gitflow"  # gitflow, github-flow, custom
+  default_branch: "main"
+  development_branch: "develop"
+  
+  # Protection Rules
+  branch_protection:
+    main:
+      required_reviews: 2
+      dismiss_stale_reviews: true
+      require_status_checks: true
+      restrict_pushes: true
+    develop:
+      required_reviews: 1
+      require_status_checks: true
+  
+  # Labels
+  labels:
+    - name: "bug"
+      color: "d73a4a"
+      description: "Something isn't working"
+    - name: "enhancement"
+      color: "a2eeef"
+      description: "New feature or request"
+    - name: "documentation"
+      color: "0075ca"
+      description: "Improvements or additions to documentation"
+    - name: "good first issue"
+      color: "7057ff"
+      description: "Good for newcomers"
+    - name: "help wanted"
+      color: "008672"
+      description: "Extra attention is needed"
+
+# Notion Database Templates
+notion_databases:
+  projects:
+    properties:
+      Name:
+        type: "title"
+        title: {}
+      Type:
+        type: "select"
+        select:
+          options:
+            - name: "web-app"
+              color: "blue"
+            - name: "api-service"
+              color: "green"
+            - name: "data-pipeline"
+              color: "yellow"
+            - name: "infrastructure"
+              color: "red"
+            - name: "automation-tool"
+              color: "purple"
+            - name: "mobile-app"
+              color: "pink"
+      Status:
+        type: "select"
+        select:
+          options:
+            - name: "Planning"
+              color: "gray"
+            - name: "In Progress"
+              color: "blue"
+            - name: "Testing"
+              color: "yellow"
+            - name: "Complete"
+              color: "green"
+            - name: "On Hold"
+              color: "red"
+      Priority:
+        type: "select"
+        select:
+          options:
+            - name: "High"
+              color: "red"
+            - name: "Medium"
+              color: "yellow"
+            - name: "Low"
+              color: "gray"
+      Progress:
+        type: "number"
+        number:
+          format: "percent"
+      Budget:
+        type: "number"
+        number:
+          format: "dollar"
+      Team:
+        type: "multi_select"
+        multi_select:
+          options: []
+      GitHub:
+        type: "url"
+        url: {}
+      Created:
+        type: "date"
+        date: {}
+      Due Date:
+        type: "date"
+        date: {}
+
+  tasks:
+    properties:
+      Name:
+        type: "title"
+        title: {}
+      Project:
+        type: "relation"
+        relation:
+          database_id: "${PROJECTS_DATABASE_ID}"
+      Status:
+        type: "select"
+        select:
+          options:
+            - name: "Not Started"
+              color: "gray"
+            - name: "In Progress"
+              color: "blue"
+            - name: "Review"
+              color: "yellow"
+            - name: "Complete"
+              color: "green"
+            - name: "Blocked"
+              color: "red"
+      Assignee:
+        type: "people"
+        people: {}
+      Priority:
+        type: "select"
+        select:
+          options:
+            - name: "High"
+              color: "red"
+            - name: "Medium"
+              color: "yellow"
+            - name: "Low"
+              color: "gray"
+      Due Date:
+        type: "date"
+        date: {}
+      Estimated Hours:
+        type: "number"
+        number: {}
+      Actual Hours:
+        type: "number"
+        number: {}
+      Tags:
+        type: "multi_select"
+        multi_select:
+          options:
+            - name: "frontend"
+              color: "blue"
+            - name: "backend"
+              color: "green"
+            - name: "database"
+              color: "yellow"
+            - name: "testing"
+              color: "purple"
+            - name: "documentation"
+              color: "gray"
+
+# Infrastructure Templates by Project Type
+infrastructure_templates:
+  web-app:
+    components:
+      web_server:
+        type: "vm"
+        specs:
+          cpu: 2
+          ram: "4GB"
+          storage: "50GB"
+          os: "ubuntu-22.04"
+        count: 2
+      database:
+        type: "vm"
+        specs:
+          cpu: 4
+          ram: "8GB"
+          storage: "100GB"
+          os: "ubuntu-22.04"
+        count: 1
+      load_balancer:
+        type: "vm"
+        specs:
+          cpu: 1
+          ram: "2GB"
+          storage: "20GB"
+          os: "ubuntu-22.04"
+        count: 1
+    networking:
+      vlan: "development"
+      security_groups:
+        - web_tier
+        - database_tier
+        - management
+      ports:
+        - 80
+        - 443
+        - 22
+        - 3306
+
+  api-service:
+    components:
+      api_server:
+        type: "container"
+        specs:
+          cpu_limit: "2"
+          memory_limit: "2GB"
+          storage: "30GB"
+        count: 3
+      database:
+        type: "vm"
+        specs:
+          cpu: 4
+          ram: "8GB"
+          storage: "100GB"
+          os: "ubuntu-22.04"
+        count: 1
+      cache:
+        type: "container"
+        specs:
+          cpu_limit: "1"
+          memory_limit: "1GB"
+          storage: "10GB"
+        count: 1
+    networking:
+      vlan: "api"
+      security_groups:
+        - api_tier
+        - database_tier
+        - cache_tier
+      ports:
+        - 8080
+        - 6379
+        - 3306
+
+  data-pipeline:
+    components:
+      processing_node:
+        type: "vm"
+        specs:
+          cpu: 8
+          ram: "16GB"
+          storage: "200GB"
+          os: "ubuntu-22.04"
+        count: 4
+      database_cluster:
+        type: "vm"
+        specs:
+          cpu: 4
+          ram: "8GB"
+          storage: "500GB"
+          os: "ubuntu-22.04"
+        count: 3
+      scheduler:
+        type: "vm"
+        specs:
+          cpu: 2
+          ram: "4GB"
+          storage: "50GB"
+          os: "ubuntu-22.04"
+        count: 1
+    networking:
+      vlan: "data"
+      security_groups:
+        - processing_tier
+        - database_tier
+        - scheduler_tier
+      ports:
+        - 9092
+        - 2181
+        - 27017
+
+# Task Templates by Project Type
+task_templates:
+  web-app:
+    - name: "Setup Development Environment"
+      type: "setup"
+      estimated_hours: 4
+      priority: "High"
+      dependencies: []
+      
+    - name: "Create Project Structure"
+      type: "development"
+      estimated_hours: 2
+      priority: "High"
+      dependencies: ["Setup Development Environment"]
+      
+    - name: "Implement Authentication"
+      type: "development"
+      estimated_hours: 16
+      priority: "High"
+      dependencies: ["Create Project Structure"]
+      
+    - name: "Design Database Schema"
+      type: "design"
+      estimated_hours: 8
+      priority: "High"
+      dependencies: ["Create Project Structure"]
+      
+    - name: "Build Frontend Components"
+      type: "development"
+      estimated_hours: 32
+      priority: "Medium"
+      dependencies: ["Implement Authentication"]
+      
+    - name: "API Development"
+      type: "development"
+      estimated_hours: 24
+      priority: "Medium"
+      dependencies: ["Design Database Schema"]
+      
+    - name: "Testing Setup"
+      type: "testing"
+      estimated_hours: 8
+      priority: "Medium"
+      dependencies: ["Build Frontend Components", "API Development"]
+      
+    - name: "Deployment Configuration"
+      type: "deployment"
+      estimated_hours: 12
+      priority: "Low"
+      dependencies: ["Testing Setup"]
+
+  api-service:
+    - name: "API Specification Design"
+      type: "design"
+      estimated_hours: 8
+      priority: "High"
+      dependencies: []
+      
+    - name: "Database Schema Design"
+      type: "design"
+      estimated_hours: 6
+      priority: "High"
+      dependencies: []
+      
+    - name: "Core API Endpoints"
+      type: "development"
+      estimated_hours: 24
+      priority: "High"
+      dependencies: ["API Specification Design", "Database Schema Design"]
+      
+    - name: "Authentication/Authorization"
+      type: "development"
+      estimated_hours: 16
+      priority: "High"
+      dependencies: ["Core API Endpoints"]
+      
+    - name: "API Documentation"
+      type: "documentation"
+      estimated_hours: 8
+      priority: "Medium"
+      dependencies: ["Core API Endpoints"]
+      
+    - name: "Testing Suite"
+      type: "testing"
+      estimated_hours: 16
+      priority: "Medium"
+      dependencies: ["Authentication/Authorization"]
+      
+    - name: "Deployment Pipeline"
+      type: "deployment"
+      estimated_hours: 12
+      priority: "Medium"
+      dependencies: ["Testing Suite"]
+
+# Documentation Templates
+documentation_templates:
+  project_overview:
+    title: "${PROJECT_NAME} - Project Overview"
+    sections:
+      - name: "Project Description"
+        content: "${PROJECT_DESCRIPTION}"
+      - name: "Objectives"
+        content: "Define project objectives and success criteria"
+      - name: "Scope"
+        content: "Define project scope and boundaries"
+      - name: "Team"
+        content: "List team members and their roles"
+      - name: "Timeline"
+        content: "High-level project timeline and milestones"
+      - name: "Resources"
+        content: "Required resources and infrastructure"
+      - name: "Risk Assessment"
+        content: "Identified risks and mitigation strategies"
+
+  technical_specifications:
+    title: "${PROJECT_NAME} - Technical Specifications"
+    sections:
+      - name: "Architecture Overview"
+        content: "High-level system architecture"
+      - name: "Technology Stack"
+        content: "Selected technologies and frameworks"
+      - name: "Database Design"
+        content: "Database schema and relationships"
+      - name: "API Specifications"
+        content: "API endpoints and data contracts"
+      - name: "Security Requirements"
+        content: "Security measures and compliance requirements"
+      - name: "Performance Requirements"
+        content: "Performance benchmarks and optimization strategies"
+      - name: "Integration Points"
+        content: "External system integrations"
+
+# Quality Gates Template
+quality_gates:
+  code_quality:
+    metrics:
+      - name: "Test Coverage"
+        threshold: ">= 80%"
+        required: true
+      - name: "Code Duplication"
+        threshold: "< 5%"
+        required: true
+      - name: "Cyclomatic Complexity"
+        threshold: "< 10"
+        required: false
+      - name: "Security Vulnerabilities"
+        threshold: "= 0"
+        required: true
+  
+  performance:
+    metrics:
+      - name: "Response Time"
+        threshold: "< 200ms"
+        required: true
+      - name: "Throughput"
+        threshold: "> 1000 req/sec"
+        required: false
+      - name: "Memory Usage"
+        threshold: "< baseline + 10%"
+        required: true
+      - name: "CPU Usage"
+        threshold: "< 80%"
+        required: true
+  
+  security:
+    metrics:
+      - name: "Vulnerability Scan"
+        threshold: "= 0 critical/high"
+        required: true
+      - name: "Dependency Audit"
+        threshold: "= 0 critical"
+        required: true
+      - name: "Code Security Scan"
+        threshold: "= 0 critical"
+        required: true
+
+# Monitoring and Alerting Templates
+monitoring_template:
+  dashboards:
+    - name: "Application Performance"
+      metrics:
+        - response_time
+        - throughput
+        - error_rate
+        - availability
+    - name: "Infrastructure Health"
+      metrics:
+        - cpu_utilization
+        - memory_usage
+        - disk_usage
+        - network_io
+    - name: "Business Metrics"
+      metrics:
+        - user_registrations
+        - active_users
+        - feature_usage
+        - conversion_rate
+  
+  alerts:
+    - name: "High Error Rate"
+      condition: "error_rate > 5%"
+      severity: "critical"
+      notification_channels: ["email", "slack", "pagerduty"]
+    - name: "High Response Time"
+      condition: "response_time > 500ms"
+      severity: "warning"
+      notification_channels: ["email", "slack"]
+    - name: "Low Disk Space"
+      condition: "disk_usage > 85%"
+      severity: "warning"
+      notification_channels: ["email", "slack"]

@@ -1,0 +1,463 @@
+name: Infrastructure Setup Workflow
+description: Comprehensive infrastructure provisioning and configuration for projects
+version: "1.0.0"
+
+metadata:
+  workflow_id: infrastructure-setup
+  category: infrastructure
+  estimated_duration: "45-90 minutes"
+  required_agents:
+    - resource-agent
+    - project-manager-agent
+    - notion-agent
+  optional_agents:
+    - github-agent
+
+trigger:
+  command: "*provision-infrastructure"
+  required_params:
+    - project_id
+    - infrastructure_type
+  optional_params:
+    - environment_type  # development, staging, production
+    - scaling_requirements
+    - compliance_requirements
+
+variables:
+  infrastructure_types:
+    web_application:
+      components:
+        - web_servers: 2
+        - database_server: 1
+        - load_balancer: 1
+        - cache_server: 1
+      resources:
+        web_server: { cpu: 2, ram: "4GB", storage: "50GB" }
+        database_server: { cpu: 4, ram: "8GB", storage: "100GB" }
+        load_balancer: { cpu: 1, ram: "2GB", storage: "20GB" }
+        cache_server: { cpu: 2, ram: "4GB", storage: "30GB" }
+    
+    api_service:
+      components:
+        - api_servers: 3
+        - database_server: 1
+        - message_queue: 1
+        - monitoring_stack: 1
+      resources:
+        api_server: { cpu: 2, ram: "2GB", storage: "30GB" }
+        database_server: { cpu: 4, ram: "8GB", storage: "100GB" }
+        message_queue: { cpu: 2, ram: "4GB", storage: "50GB" }
+        monitoring_stack: { cpu: 2, ram: "4GB", storage: "100GB" }
+    
+    data_pipeline:
+      components:
+        - processing_nodes: 4
+        - database_cluster: 3
+        - storage_cluster: 1
+        - scheduler: 1
+      resources:
+        processing_node: { cpu: 8, ram: "16GB", storage: "200GB" }
+        database_node: { cpu: 4, ram: "8GB", storage: "500GB" }
+        storage_cluster: { cpu: 2, ram: "4GB", storage: "2TB" }
+        scheduler: { cpu: 2, ram: "4GB", storage: "50GB" }
+
+stages:
+  - stage: "requirements_analysis"
+    name: "Infrastructure Requirements Analysis"
+    agent: resource-agent
+    tasks:
+      - task: analyze_project_requirements
+        description: "Analyze project needs and determine infrastructure specifications"
+        inputs:
+          - project_id
+          - infrastructure_type
+          - expected_load
+          - compliance_requirements
+        outputs:
+          - infrastructure_specification
+          - resource_requirements
+          - cost_estimate
+        
+      - task: validate_resource_availability
+        description: "Check availability of required resources"
+        inputs:
+          - resource_requirements
+          - preferred_locations
+        outputs:
+          - availability_status
+          - alternative_options
+          - resource_constraints
+        
+      - task: create_architecture_design
+        description: "Design infrastructure architecture and topology"
+        inputs:
+          - infrastructure_specification
+          - availability_status
+          - security_requirements
+        outputs:
+          - architecture_diagram
+          - component_specifications
+          - network_topology
+
+  - stage: "resource_allocation"
+    name: "Resource Allocation and Reservation"
+    agent: resource-agent
+    depends_on: requirements_analysis
+    tasks:
+      - task: reserve_compute_resources
+        description: "Reserve virtual machines and containers"
+        inputs:
+          - component_specifications
+          - resource_requirements
+        outputs:
+          - reserved_resources
+          - resource_ids
+          - allocation_confirmation
+        
+      - task: allocate_storage
+        description: "Allocate and configure storage resources"
+        inputs:
+          - storage_requirements
+          - backup_requirements
+        outputs:
+          - storage_allocations
+          - storage_endpoints
+          - backup_configuration
+        
+      - task: configure_networking
+        description: "Set up network infrastructure and security groups"
+        inputs:
+          - network_topology
+          - security_requirements
+        outputs:
+          - network_configuration
+          - security_groups
+          - firewall_rules
+        
+      - task: reserve_ip_addresses
+        description: "Allocate IP addresses and configure DNS"
+        inputs:
+          - network_configuration
+          - domain_requirements
+        outputs:
+          - ip_allocations
+          - dns_configuration
+          - ssl_certificate_requests
+
+  - stage: "infrastructure_provisioning"
+    name: "Infrastructure Provisioning"
+    agent: resource-agent
+    depends_on: resource_allocation
+    tasks:
+      - task: provision_virtual_machines
+        description: "Create and configure virtual machines"
+        inputs:
+          - reserved_resources
+          - vm_templates
+          - configuration_scripts
+        outputs:
+          - vm_instances
+          - vm_endpoints
+          - access_credentials
+        
+      - task: setup_container_orchestration
+        description: "Configure container orchestration platform"
+        inputs:
+          - container_requirements
+          - orchestration_platform
+        outputs:
+          - orchestration_cluster
+          - container_registry
+          - deployment_pipelines
+        condition:
+          - infrastructure_type: ["api_service", "microservices"]
+        
+      - task: configure_databases
+        description: "Set up and configure database systems"
+        inputs:
+          - database_requirements
+          - backup_configuration
+        outputs:
+          - database_instances
+          - database_endpoints
+          - database_credentials
+        
+      - task: setup_load_balancers
+        description: "Configure load balancers and traffic routing"
+        inputs:
+          - load_balancer_configuration
+          - backend_servers
+        outputs:
+          - load_balancer_endpoints
+          - traffic_routing_rules
+          - health_check_configuration
+
+  - stage: "security_hardening"
+    name: "Security Configuration and Hardening"
+    agent: resource-agent
+    depends_on: infrastructure_provisioning
+    tasks:
+      - task: configure_firewalls
+        description: "Set up firewall rules and network security"
+        inputs:
+          - security_requirements
+          - network_configuration
+        outputs:
+          - firewall_configuration
+          - security_policies
+          - intrusion_detection
+        
+      - task: setup_ssl_certificates
+        description: "Install and configure SSL certificates"
+        inputs:
+          - ssl_certificate_requests
+          - domain_configuration
+        outputs:
+          - ssl_installation_status
+          - certificate_renewal_schedule
+        
+      - task: configure_access_control
+        description: "Set up user access control and authentication"
+        inputs:
+          - access_requirements
+          - team_members
+        outputs:
+          - user_accounts
+          - access_policies
+          - authentication_configuration
+        
+      - task: enable_audit_logging
+        description: "Configure audit logging and compliance monitoring"
+        inputs:
+          - compliance_requirements
+          - logging_requirements
+        outputs:
+          - audit_configuration
+          - log_aggregation_setup
+          - compliance_monitoring
+
+  - stage: "monitoring_setup"
+    name: "Monitoring and Alerting Setup"
+    agent: resource-agent
+    depends_on: security_hardening
+    tasks:
+      - task: deploy_monitoring_stack
+        description: "Deploy comprehensive monitoring solution"
+        inputs:
+          - monitoring_requirements
+          - infrastructure_components
+        outputs:
+          - monitoring_endpoints
+          - dashboard_urls
+          - metric_collection_status
+        
+      - task: configure_alerting
+        description: "Set up alerting rules and notification channels"
+        inputs:
+          - alert_requirements
+          - escalation_procedures
+        outputs:
+          - alert_rules
+          - notification_channels
+          - escalation_configuration
+        
+      - task: setup_log_management
+        description: "Configure centralized logging and analysis"
+        inputs:
+          - log_sources
+          - retention_requirements
+        outputs:
+          - log_aggregation_endpoints
+          - log_retention_policies
+          - search_and_analysis_tools
+        
+      - task: implement_backup_monitoring
+        description: "Set up backup monitoring and verification"
+        inputs:
+          - backup_configuration
+          - recovery_requirements
+        outputs:
+          - backup_monitoring_status
+          - recovery_test_schedule
+          - backup_verification_reports
+
+  - stage: "testing_and_validation"
+    name: "Infrastructure Testing and Validation"
+    agent: resource-agent
+    depends_on: monitoring_setup
+    tasks:
+      - task: run_connectivity_tests
+        description: "Test all network connections and endpoints"
+        inputs:
+          - network_configuration
+          - service_endpoints
+        outputs:
+          - connectivity_test_results
+          - network_performance_metrics
+        
+      - task: perform_security_testing
+        description: "Execute security vulnerability scans"
+        inputs:
+          - security_configuration
+          - vulnerability_scan_tools
+        outputs:
+          - security_scan_results
+          - vulnerability_reports
+          - remediation_recommendations
+        
+      - task: conduct_performance_testing
+        description: "Test infrastructure performance and capacity"
+        inputs:
+          - performance_requirements
+          - load_testing_scenarios
+        outputs:
+          - performance_test_results
+          - capacity_analysis
+          - optimization_recommendations
+        
+      - task: validate_backup_and_recovery
+        description: "Test backup and disaster recovery procedures"
+        inputs:
+          - backup_configuration
+          - recovery_procedures
+        outputs:
+          - backup_test_results
+          - recovery_time_metrics
+          - recovery_validation_report
+
+  - stage: "documentation_and_handover"
+    name: "Documentation and Team Handover"
+    agent: project-manager-agent
+    depends_on: testing_and_validation
+    tasks:
+      - task: generate_infrastructure_documentation
+        description: "Create comprehensive infrastructure documentation"
+        inputs:
+          - architecture_diagram
+          - component_specifications
+          - configuration_details
+        outputs:
+          - infrastructure_documentation
+          - operational_runbooks
+          - troubleshooting_guides
+        
+      - task: create_access_documentation
+        description: "Document access procedures and credentials"
+        inputs:
+          - access_credentials
+          - security_procedures
+        outputs:
+          - access_documentation
+          - credential_management_guide
+          - security_procedures_document
+        
+      - task: update_notion_databases
+        description: "Update Notion with infrastructure details"
+        inputs:
+          - project_id
+          - infrastructure_details
+          - resource_allocations
+        outputs:
+          - notion_updates
+          - resource_database_entries
+        
+      - task: conduct_team_handover
+        description: "Brief team on infrastructure setup and operations"
+        inputs:
+          - team_members
+          - infrastructure_documentation
+          - operational_procedures
+        outputs:
+          - handover_completion_status
+          - team_training_records
+          - knowledge_transfer_verification
+
+success_criteria:
+  infrastructure_provisioned:
+    - all_resources_allocated: true
+    - connectivity_verified: true
+    - security_configured: true
+    - monitoring_operational: true
+  
+  quality_gates:
+    - security_scan_passed: true
+    - performance_requirements_met: true
+    - backup_procedures_validated: true
+    - documentation_complete: true
+
+rollback_procedures:
+  resource_cleanup:
+    - Deallocate all provisioned resources
+    - Release IP addresses and DNS entries
+    - Clean up security groups and firewall rules
+    - Remove monitoring configurations
+  
+  cost_management:
+    - Stop all billable resources
+    - Release reserved capacity
+    - Clean up storage allocations
+    - Update cost tracking systems
+
+error_handling:
+  resource_provisioning_failure:
+    action: "Retry with alternative resource pools"
+    escalation: "Contact infrastructure team for manual intervention"
+    
+  security_validation_failure:
+    action: "Block infrastructure activation until resolved"
+    notification: "Alert security team and project manager"
+    
+  performance_test_failure:
+    action: "Analyze and optimize configuration"
+    fallback: "Scale resources to meet requirements"
+
+monitoring_and_alerting:
+  infrastructure_health:
+    - Resource utilization monitoring
+    - Service availability checks
+    - Performance threshold monitoring
+    - Security event monitoring
+  
+  cost_monitoring:
+    - Resource usage tracking
+    - Budget threshold alerts
+    - Cost optimization recommendations
+    - Usage trend analysis
+  
+  compliance_monitoring:
+    - Security policy compliance
+    - Audit log completeness
+    - Access control validation
+    - Data protection compliance
+
+notifications:
+  provisioning_start:
+    recipients: [project_manager, infrastructure_team]
+    message: "Infrastructure provisioning started for project {project_name}"
+  
+  stage_completion:
+    recipients: [project_manager]
+    message: "Completed {stage_name} for project {project_name}"
+  
+  infrastructure_ready:
+    recipients: [project_team, stakeholders]
+    message: "Infrastructure ready for project {project_name}"
+    attachments: [access_documentation, operational_runbooks]
+  
+  provisioning_failure:
+    recipients: [project_manager, infrastructure_team]
+    message: "Infrastructure provisioning failed at {failed_stage}"
+    attachments: [error_log, rollback_summary]
+
+cost_management:
+  budget_tracking:
+    - Resource allocation costs
+    - Operational expenses
+    - Projected monthly costs
+    - Cost per project component
+  
+  optimization_recommendations:
+    - Right-sizing opportunities
+    - Reserved instance potential
+    - Storage optimization
+    - Network efficiency improvements

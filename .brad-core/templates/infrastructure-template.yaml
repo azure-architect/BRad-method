@@ -1,0 +1,438 @@
+name: Infrastructure Template
+description: Standard template for infrastructure provisioning in the BRad Method system
+version: "1.0.0"
+
+metadata:
+  template_id: infrastructure-template
+  category: infrastructure
+  supported_platforms:
+    - proxmox_ve
+    - vmware_vsphere
+    - kubernetes
+    - docker_compose
+  supported_environments:
+    - development
+    - testing
+    - staging
+    - production
+
+# Basic Infrastructure Information
+infrastructure_info:
+  name: "${INFRASTRUCTURE_NAME}"
+  description: "${INFRASTRUCTURE_DESCRIPTION}"
+  project_id: "${PROJECT_ID}"
+  environment: "${ENVIRONMENT}"
+  region: "${REGION}"
+  availability_zone: "${AVAILABILITY_ZONE}"
+  created_date: "${CURRENT_DATE}"
+  
+# Resource Specifications Template
+resource_specifications:
+  compute:
+    virtual_machines:
+      - name: "${VM_NAME}"
+        template: "${VM_TEMPLATE}"
+        cpu_cores: "${CPU_CORES}"
+        memory_gb: "${MEMORY_GB}"
+        storage_gb: "${STORAGE_GB}"
+        os_type: "${OS_TYPE}"
+        count: "${VM_COUNT}"
+        tags:
+          - "${VM_TAGS}"
+    
+    containers:
+      - name: "${CONTAINER_NAME}"
+        image: "${CONTAINER_IMAGE}"
+        cpu_limit: "${CPU_LIMIT}"
+        memory_limit: "${MEMORY_LIMIT}"
+        storage_gb: "${STORAGE_GB}"
+        replicas: "${REPLICA_COUNT}"
+        ports: "${EXPOSED_PORTS}"
+  
+  storage:
+    volumes:
+      - name: "${VOLUME_NAME}"
+        size_gb: "${VOLUME_SIZE}"
+        type: "${STORAGE_TYPE}"  # ssd, hdd, nvme
+        performance_tier: "${PERFORMANCE_TIER}"  # standard, high, premium
+        backup_enabled: "${BACKUP_ENABLED}"
+        encryption_enabled: "${ENCRYPTION_ENABLED}"
+    
+    shared_storage:
+      - name: "${SHARED_STORAGE_NAME}"
+        type: "${SHARED_TYPE}"  # nfs, cifs, glusterfs
+        size_gb: "${SHARED_SIZE}"
+        access_mode: "${ACCESS_MODE}"  # read_write, read_only
+        backup_enabled: true
+  
+  networking:
+    networks:
+      - name: "${NETWORK_NAME}"
+        type: "${NETWORK_TYPE}"  # vlan, bridge, overlay
+        subnet: "${SUBNET_CIDR}"
+        gateway: "${GATEWAY_IP}"
+        dns_servers: "${DNS_SERVERS}"
+        dhcp_enabled: "${DHCP_ENABLED}"
+    
+    load_balancers:
+      - name: "${LB_NAME}"
+        type: "${LB_TYPE}"  # application, network
+        algorithm: "${LB_ALGORITHM}"  # round_robin, least_conn, ip_hash
+        backend_servers: "${BACKEND_SERVERS}"
+        health_check: "${HEALTH_CHECK_CONFIG}"
+
+# Environment-Specific Templates
+environment_templates:
+  development:
+    resource_sizing: "small"
+    high_availability: false
+    backup_frequency: "weekly"
+    monitoring_level: "basic"
+    security_level: "standard"
+    cost_optimization: "aggressive"
+    
+    defaults:
+      vm_cpu: 2
+      vm_memory: 4
+      vm_storage: 50
+      container_cpu_limit: "1"
+      container_memory_limit: "2Gi"
+  
+  testing:
+    resource_sizing: "medium"
+    high_availability: false
+    backup_frequency: "daily"
+    monitoring_level: "enhanced"
+    security_level: "standard"
+    cost_optimization: "moderate"
+    
+    defaults:
+      vm_cpu: 4
+      vm_memory: 8
+      vm_storage: 100
+      container_cpu_limit: "2"
+      container_memory_limit: "4Gi"
+  
+  staging:
+    resource_sizing: "production-like"
+    high_availability: true
+    backup_frequency: "daily"
+    monitoring_level: "full"
+    security_level: "enhanced"
+    cost_optimization: "balanced"
+    
+    defaults:
+      vm_cpu: 8
+      vm_memory: 16
+      vm_storage: 200
+      container_cpu_limit: "4"
+      container_memory_limit: "8Gi"
+  
+  production:
+    resource_sizing: "optimized"
+    high_availability: true
+    backup_frequency: "continuous"
+    monitoring_level: "comprehensive"
+    security_level: "maximum"
+    cost_optimization: "performance"
+    
+    defaults:
+      vm_cpu: 16
+      vm_memory: 32
+      vm_storage: 500
+      container_cpu_limit: "8"
+      container_memory_limit: "16Gi"
+
+# Security Configuration Template
+security_configuration:
+  network_security:
+    firewalls:
+      - name: "${FIREWALL_NAME}"
+        type: "${FIREWALL_TYPE}"  # host, network, application
+        rules:
+          - name: "${RULE_NAME}"
+            action: "${ACTION}"  # allow, deny, log
+            source: "${SOURCE_CIDR}"
+            destination: "${DEST_CIDR}"
+            port: "${PORT_RANGE}"
+            protocol: "${PROTOCOL}"  # tcp, udp, icmp
+    
+    vpn_access:
+      enabled: "${VPN_ENABLED}"
+      type: "${VPN_TYPE}"  # openvpn, ipsec, wireguard
+      authentication: "${AUTH_METHOD}"  # certificate, psk, ldap
+      encryption: "${ENCRYPTION_TYPE}"
+  
+  access_control:
+    user_management:
+      authentication_method: "${AUTH_METHOD}"  # local, ldap, oauth, saml
+      password_policy:
+        min_length: 12
+        complexity_required: true
+        expiry_days: 90
+        history_count: 12
+      
+      mfa_required: true
+      session_timeout: 30  # minutes
+    
+    service_accounts:
+      - name: "${SERVICE_ACCOUNT_NAME}"
+        purpose: "${SERVICE_PURPOSE}"
+        permissions: "${SERVICE_PERMISSIONS}"
+        key_rotation_days: 90
+  
+  data_protection:
+    encryption:
+      at_rest: true
+      in_transit: true
+      key_management: "${KEY_MANAGEMENT_TYPE}"  # local, external, hsm
+    
+    backup_security:
+      encryption_enabled: true
+      access_restricted: true
+      retention_policy: "${RETENTION_POLICY}"
+      offsite_storage: true
+
+# Monitoring and Alerting Template
+monitoring_configuration:
+  system_monitoring:
+    metrics_collection:
+      cpu_utilization: true
+      memory_usage: true
+      disk_usage: true
+      network_io: true
+      process_monitoring: true
+    
+    collection_interval: 60  # seconds
+    retention_period: 30  # days
+    
+    dashboards:
+      - name: "Infrastructure Overview"
+        panels:
+          - cpu_utilization_by_host
+          - memory_usage_by_host
+          - disk_usage_by_host
+          - network_throughput
+      
+      - name: "Application Performance"
+        panels:
+          - response_time
+          - request_rate
+          - error_rate
+          - active_connections
+  
+  alerting_rules:
+    critical_alerts:
+      - name: "High CPU Usage"
+        condition: "cpu_usage > 90%"
+        duration: "5m"
+        severity: "critical"
+        notification_channels: ["email", "slack", "pagerduty"]
+      
+      - name: "Low Disk Space"
+        condition: "disk_free < 10%"
+        duration: "1m"
+        severity: "critical"
+        notification_channels: ["email", "slack", "pagerduty"]
+      
+      - name: "Service Down"
+        condition: "service_up == 0"
+        duration: "30s"
+        severity: "critical"
+        notification_channels: ["email", "slack", "pagerduty"]
+    
+    warning_alerts:
+      - name: "High Memory Usage"
+        condition: "memory_usage > 80%"
+        duration: "10m"
+        severity: "warning"
+        notification_channels: ["email", "slack"]
+      
+      - name: "High Network Traffic"
+        condition: "network_rx > 100MB/s"
+        duration: "5m"
+        severity: "warning"
+        notification_channels: ["email"]
+  
+  log_management:
+    centralized_logging: true
+    log_sources:
+      - system_logs
+      - application_logs
+      - security_logs
+      - audit_logs
+    
+    log_retention: 90  # days
+    log_analysis: true
+    log_alerting: true
+
+# Backup and Recovery Template
+backup_configuration:
+  backup_strategy:
+    full_backup_frequency: "weekly"
+    incremental_backup_frequency: "daily"
+    snapshot_frequency: "hourly"
+    retention_policy:
+      daily_snapshots: 7
+      weekly_backups: 4
+      monthly_backups: 12
+      yearly_backups: 3
+  
+  backup_targets:
+    - type: "vm_snapshot"
+      schedule: "0 2 * * *"  # Daily at 2 AM
+      retention_days: 30
+    
+    - type: "database_dump"
+      schedule: "0 1 * * *"  # Daily at 1 AM
+      retention_days: 60
+    
+    - type: "application_data"
+      schedule: "0 3 * * *"  # Daily at 3 AM
+      retention_days: 90
+  
+  disaster_recovery:
+    rto_target: "4 hours"  # Recovery Time Objective
+    rpo_target: "1 hour"   # Recovery Point Objective
+    
+    recovery_procedures:
+      - name: "System Recovery"
+        steps:
+          - "Assess damage and scope"
+          - "Activate DR site if needed"
+          - "Restore from latest backup"
+          - "Verify system integrity"
+          - "Resume operations"
+      
+      - name: "Data Recovery"
+        steps:
+          - "Identify data loss extent"
+          - "Select appropriate backup"
+          - "Restore data files"
+          - "Verify data integrity"
+          - "Update applications"
+
+# Deployment Configuration Template
+deployment_configuration:
+  deployment_strategy:
+    type: "${DEPLOYMENT_TYPE}"  # blue_green, rolling, canary
+    automation_level: "${AUTOMATION_LEVEL}"  # manual, semi_auto, full_auto
+    rollback_strategy: "${ROLLBACK_STRATEGY}"
+  
+  ci_cd_integration:
+    pipeline_triggers:
+      - code_push
+      - pull_request_merge
+      - scheduled_deployment
+    
+    deployment_stages:
+      - name: "Build"
+        tasks:
+          - code_compilation
+          - dependency_resolution
+          - artifact_creation
+      
+      - name: "Test"
+        tasks:
+          - unit_tests
+          - integration_tests
+          - security_scans
+      
+      - name: "Deploy"
+        tasks:
+          - infrastructure_provisioning
+          - application_deployment
+          - smoke_tests
+      
+      - name: "Verify"
+        tasks:
+          - health_checks
+          - performance_tests
+          - user_acceptance_tests
+  
+  environment_promotion:
+    workflow:
+      - development -> testing
+      - testing -> staging
+      - staging -> production
+    
+    approval_gates:
+      - stage: "staging"
+        approvers: ["tech_lead", "product_owner"]
+        automated_checks: true
+      
+      - stage: "production"
+        approvers: ["tech_lead", "product_owner", "ops_lead"]
+        automated_checks: true
+        manual_verification: true
+
+# Cost Management Template
+cost_management:
+  budgeting:
+    monthly_budget: "${MONTHLY_BUDGET}"
+    cost_centers:
+      - compute: "${COMPUTE_BUDGET_PERCENT}%"
+      - storage: "${STORAGE_BUDGET_PERCENT}%"
+      - networking: "${NETWORK_BUDGET_PERCENT}%"
+      - monitoring: "${MONITORING_BUDGET_PERCENT}%"
+  
+  optimization:
+    right_sizing:
+      enabled: true
+      review_frequency: "monthly"
+      utilization_threshold: 70
+    
+    scheduling:
+      auto_shutdown:
+        enabled: "${AUTO_SHUTDOWN_ENABLED}"
+        schedule: "${SHUTDOWN_SCHEDULE}"
+        environments: ["development", "testing"]
+      
+      auto_scaling:
+        enabled: "${AUTO_SCALING_ENABLED}"
+        min_instances: "${MIN_INSTANCES}"
+        max_instances: "${MAX_INSTANCES}"
+        scale_up_threshold: 80
+        scale_down_threshold: 30
+  
+  reporting:
+    cost_tracking: true
+    usage_analytics: true
+    optimization_recommendations: true
+    budget_alerts:
+      - threshold: 80
+        notification: "warning"
+      - threshold: 95
+        notification: "critical"
+
+# Compliance and Governance Template
+compliance_configuration:
+  regulatory_requirements:
+    - standard: "${COMPLIANCE_STANDARD}"  # gdpr, hipaa, sox, pci_dss
+      applicable: "${STANDARD_APPLICABLE}"
+      controls_implemented: "${CONTROLS_LIST}"
+  
+  governance_policies:
+    resource_tagging:
+      required_tags:
+        - project
+        - environment
+        - owner
+        - cost_center
+        - compliance_level
+    
+    change_management:
+      approval_required: true
+      change_window: "${CHANGE_WINDOW}"
+      rollback_plan_required: true
+      testing_required: true
+  
+  audit_requirements:
+    logging_enabled: true
+    activity_monitoring: true
+    access_logging: true
+    configuration_tracking: true
+    
+    audit_frequency: "quarterly"
+    audit_scope: "full_infrastructure"
+    remediation_timeframe: "30_days"
