@@ -44,54 +44,50 @@ commands:
 
 database_schemas:
   projects:
+    # ACTUAL DATABASE SCHEMA - UPDATED FROM LIVE NOTION VALIDATION
+    database_id: "23abf6e5-4d3b-815a-8426-c45496d89c6d"
     required_properties:
-      - Name: title
-      - Type: select (web-app, api-service, data-pipeline, infrastructure, automation-tool, mobile-app)
-      - Status: select (Planning, Active, On Hold, Complete, Archived)
+      - "Project name": title  # Actual property name in Notion
+      - Status: status (Planning, In Progress, Paused, Backlog, Done, Canceled)
       - Priority: select (High, Medium, Low)
-      - Created: date
-      - Description: rich_text
-    optional_properties:
-      - GitHub Repo: url
-      - Team Members: multi_select
-      - Infrastructure Needs: multi_select
-      - Completion Percentage: number
+      - Owner: people
+    available_properties:
+      - "Project name": title
+      - Status: status  # Uses Notion's built-in status property
+      - Priority: select
+      - Owner: people
+      - Dates: date  # Use this for sorting, not "Created"
+      - Completion: rollup  # Calculated from linked tasks
+      - Summary: rich_text
+      - Tasks: relation (to tasks database)
+      - "Is Blocking": relation (to other projects)
+      - "Blocked By": relation (to other projects)
+      - "Related to Notes v1.0 (Related Projects)": relation (to notes)
+      - "Related to Video Clips Library - Central Hub (Related Project)": relation (to videos)
+      - "Sign off project?": button
+    sorting_fields:
+      - Use "Dates" instead of "Created" for chronological sorting
+      - Available sort directions: ascending, descending
 
   tasks:
-    required_properties:
-      - Name: title
-      - Project: relation (projects)
-      - Status: select (Not Started, In Progress, Review, Complete)
-      - Priority: select (High, Medium, Low)
-      - Created: date
-    optional_properties:
-      - Assignee: person
-      - Due Date: date
-      - Dependencies: relation (tasks)
-      - Estimated Hours: number
-      - Actual Hours: number
-
+    # ACTUAL TASKS DATABASE SCHEMA - TO BE VALIDATED
+    database_id: "23abf6e5-4d3b-8163-96c6-ea0a6a641ea2"
+    # Schema needs validation - use MCP tools to verify actual properties
+    
   notes:
-    required_properties:
-      - Title: title
-      - Type: select (Project Documentation, Meeting Notes, Technical Specs, Architecture)
-      - Content: rich_text
-      - Created: date
-    optional_properties:
-      - Linked Project: relation (projects)
-      - Tags: multi_select
-      - Author: person
-
+    # ACTUAL NOTES DATABASE SCHEMA - TO BE VALIDATED  
+    database_id: "23bbf6e5-4d3b-81d1-beb5-e1016a65db65"
+    # Schema needs validation - use MCP tools to verify actual properties
+    
+  videos:
+    # ACTUAL VIDEOS DATABASE SCHEMA - TO BE VALIDATED
+    database_id: "23cbf6e5-4d3b-8190-8664-cd3ed066e6d8"
+    # Schema needs validation - use MCP tools to verify actual properties
+    
   resources:
-    required_properties:
-      - Name: title
-      - Type: select (Database, Container, VM, Storage, Network)
-      - Status: select (Available, Allocated, Maintenance, Offline)
-      - Project: relation (projects)
-    optional_properties:
-      - Specifications: rich_text
-      - Location: select
-      - Cost: number
+    # OPTIONAL RESOURCES DATABASE - NOT YET CREATED
+    database_id: ""  # Empty - needs creation if infrastructure tracking required
+    # Schema to be defined when/if database is created
 
 operations:
   project_creation:
@@ -134,6 +130,19 @@ error_handling:
     - Check required properties before submission
     - Validate property types and formats
     - Provide clear error messages for fixes
+    
+  schema_validation_errors:
+    - When sort property doesn't exist, query database schema first
+    - Use MCP retrieve-a-database to get actual property names
+    - Update internal schema knowledge based on API responses
+    - Fall back to unsorted queries if sorting fails
+    - Example: "Created" property doesn't exist, use "Dates" instead
+    
+  property_name_mismatches:
+    - Always use exact property names from Notion (case-sensitive)
+    - Handle spaces in property names correctly
+    - Use property IDs when names are complex
+    - Validate all property references before operations
 
 integration_points:
   github_sync:

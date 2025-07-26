@@ -43,6 +43,9 @@ commands:
   - test-connectivity: Test Proxmox API connection and authentication
   - discover: Auto-discover available Proxmox resources and nodes
   - status: Check current resource availability and utilization
+  - list-storage: List all storage pools and usage statistics
+  - list-vms: List all virtual machines and their status
+  - list-containers: List all LXC containers and their status  
   - allocate: Allocate VMs/containers for specific project requirements
   - deallocate: Release resources and clean up allocations
   - monitor: Monitor resource performance and health via Proxmox API
@@ -51,6 +54,198 @@ commands:
   - migrate: Migrate resources between Proxmox hosts
   - sync-notion: Update Notion Resources database with current state
   - cost-analysis: Generate cost reports and optimization recommendations
+
+working_api_commands:
+  authenticate:
+    command: |
+      curl -s -k -X POST "https://192.168.0.199:8006/api2/json/access/ticket" \
+        -H "Content-Type: application/x-www-form-urlencoded" \
+        -d "username=root@pam&password=pedro" > /tmp/auth.json
+      TICKET=$(python3 -c "import json; data=json.load(open('/tmp/auth.json')); print(data['data']['ticket'])")
+    
+  list_storage:
+    command: |
+      curl -s -k -X GET "https://192.168.0.199:8006/api2/json/nodes/proxmox/storage" \
+        -H "Cookie: PVEAuthCookie=${TICKET}" | python3 -m json.tool
+    description: "Lists all storage pools with usage statistics and availability"
+    
+  list_nodes:
+    command: |
+      curl -s -k -X GET "https://192.168.0.199:8006/api2/json/nodes" \
+        -H "Cookie: PVEAuthCookie=${TICKET}" | python3 -m json.tool
+    description: "Lists all Proxmox nodes with resource usage and status"
+
+local_documentation_integration:
+  documentation_root: "/Volumes/Samsung/mo/knowledge/docs/proxmox/"
+  
+  core_reference_files:
+    api_reference:
+      file: "pvesh.1.md"
+      purpose: "Complete Proxmox VE API shell interface reference"
+      contains:
+        - "All API endpoints and parameters"
+        - "Authentication methods and examples"
+        - "Output formatting options (JSON, YAML, text)"
+        - "Error handling and troubleshooting"
+      key_commands:
+        - "pvesh get <api_path>": "GET API calls"
+        - "pvesh set <api_path>": "PUT API calls" 
+        - "pvesh create <api_path>": "POST API calls"
+        - "pvesh delete <api_path>": "DELETE API calls"
+        - "pvesh ls <api_path>": "List child objects"
+        - "pvesh usage <api_path>": "Get API usage info"
+        
+    vm_management:
+      file: "qm.1.md"
+      purpose: "QEMU/KVM Virtual Machine Manager complete reference"
+      contains:
+        - "VM lifecycle management (create, start, stop, destroy)"
+        - "Configuration management (CPU, memory, disk, network)"
+        - "Snapshot and backup operations"
+        - "Migration and cloning procedures"
+        - "Monitoring and performance tuning"
+      key_commands:
+        - "qm list": "List all VMs with status"
+        - "qm status <vmid>": "Get VM status and resource usage"
+        - "qm config <vmid>": "Show VM configuration"
+        - "qm create <vmid>": "Create new VM"
+        - "qm start <vmid>": "Start VM"
+        - "qm stop <vmid>": "Stop VM"
+        - "qm clone <vmid> <newid>": "Clone VM"
+        - "qm snapshot <vmid> <snapname>": "Create snapshot"
+        
+    container_management:
+      file: "pct.1.md" 
+      purpose: "Linux Container (LXC) management complete reference"
+      contains:
+        - "Container lifecycle (create, start, stop, destroy)"
+        - "Template management and deployment"
+        - "Resource allocation and limits"
+        - "Network and storage configuration"
+        - "Security and privilege settings"
+      key_commands:
+        - "pct list": "List all containers with status"
+        - "pct status <vmid>": "Get container status"
+        - "pct config <vmid>": "Show container configuration"
+        - "pct create <vmid>": "Create new container"
+        - "pct start <vmid>": "Start container"
+        - "pct stop <vmid>": "Stop container"
+        - "pct clone <vmid> <newid>": "Clone container"
+        - "pct enter <vmid>": "Enter container shell"
+        
+    cli_tools:
+      file: "section__command_line_interface.md"
+      purpose: "Command-line interface tools and formatting options"
+      contains:
+        - "Output format options (--output-format json|yaml|text)"
+        - "Human-readable formatting options"
+        - "Storage manager (pvesm) commands"
+        - "Backup and restore utilities"
+        - "Network configuration tools"
+      key_commands:
+        - "pvesm list": "List storage pools"
+        - "pvesm status": "Storage status and usage"
+        - "pvesm alloc": "Allocate storage space"
+        - "pvesm free": "Free storage space"
+        
+    complete_guide:
+      file: "proxmox_ve_admin_guide_complete.md"
+      purpose: "Complete Proxmox VE administration guide"
+      contains:
+        - "Installation and setup procedures"
+        - "Cluster management and HA configuration"
+        - "Storage types and configuration"
+        - "Network setup and SDN"
+        - "Backup strategies and disaster recovery"
+        - "Security best practices"
+        - "Performance tuning and optimization"
+        
+  specialized_sections:
+    storage_management:
+      file: "section_chapter_storage.md"
+      covers: "All storage types, configuration, and management"
+      
+    virtual_machines:
+      file: "section_chapter_virtual_machines.md" 
+      covers: "VM creation, configuration, and management"
+      
+    containers:
+      file: "section_chapter_pct.md"
+      covers: "Container creation, templates, and management"
+      
+    networking:
+      file: "section_chapter_pvesdn.md"
+      covers: "Software-defined networking and VLANs"
+      
+    clustering:
+      file: "section_chapter_pvecm.md"
+      covers: "Cluster setup, management, and high availability"
+      
+    backup_restore:
+      file: "section_chapter_vzdump.md"
+      covers: "Backup strategies, scheduling, and restore procedures"
+      
+    firewall:
+      file: "section_chapter_pve_firewall.md"
+      covers: "Firewall configuration and security policies"
+
+  operation_workflows:
+    vm_provisioning:
+      documentation_path: ["qm.1.md", "section_chapter_virtual_machines.md"]
+      steps:
+        1. "Reference qm.1.md for VM creation syntax"
+        2. "Check section_chapter_virtual_machines.md for configuration options"
+        3. "Use qm create with appropriate template and resources"
+        4. "Configure networking and storage per documentation"
+        5. "Start VM and verify status with qm status"
+        
+    container_provisioning:
+      documentation_path: ["pct.1.md", "section_chapter_pct.md"]
+      steps:
+        1. "Reference pct.1.md for container creation syntax"
+        2. "Check section_chapter_pct.md for template options"
+        3. "Use pct create with template and resource allocation"
+        4. "Configure container settings per documentation"
+        5. "Start container and verify with pct status"
+        
+    storage_management:
+      documentation_path: ["section__command_line_interface.md", "section_chapter_storage.md"]
+      steps:
+        1. "Check current storage with pvesm list"
+        2. "Reference section_chapter_storage.md for storage types"
+        3. "Allocate storage space with pvesm alloc"
+        4. "Configure storage pools per documentation"
+        5. "Monitor usage with pvesm status"
+        
+    api_operations:
+      documentation_path: ["pvesh.1.md"]
+      steps:
+        1. "Always reference pvesh.1.md before making API calls"
+        2. "Use pvesh usage <endpoint> to check API documentation"
+        3. "Prefer pvesh over raw curl for authenticated operations"
+        4. "Use --output-format json for programmatic parsing"
+        5. "Handle errors per pvesh.1.md error handling section"
+
+  documentation_integration_rules:
+    before_any_operation:
+      - "ALWAYS consult relevant documentation file first"
+      - "Use pvesh usage <endpoint> to validate API calls"
+      - "Reference complete guide for complex multi-step operations"
+      
+    error_handling:
+      - "Check documentation for error codes and solutions"
+      - "Consult FAQ section in admin guide for common issues"
+      - "Validate syntax against command reference documentation"
+      
+    best_practices:
+      - "Follow security guidelines from complete admin guide"
+      - "Use documented backup procedures before major changes"
+      - "Implement monitoring per performance tuning documentation"
+      
+    command_preference_order:
+      1. "Native Proxmox CLI tools (qm, pct, pvesm, pvesh)"
+      2. "pvesh API calls with proper documentation reference"
+      3. "Raw curl only as last resort with full authentication handling"
 
 resource_types:
   virtual_machines:
@@ -127,6 +322,20 @@ resource_types:
         vlan: 200
         subnet: 192.168.200.0/24
         firewall: strict
+    
+    naming_conventions:
+      container_naming_pattern: "lxc-[service]-[container_id]"
+      ip_mapping_rule: "Container ID = Last octet of IP address"
+      network_scheme: "192.168.0.x where x = container_id"
+      examples:
+        - "lxc-jellyfin-115 → IP: 192.168.0.115"
+        - "lxc-files-116 → IP: 192.168.0.116" 
+        - "lxc-docker-135 → IP: 192.168.0.135"
+      benefits:
+        - "Direct container ID to IP mapping"
+        - "Easy network identification from container name"
+        - "Consistent naming across infrastructure"
+        - "Simplified network troubleshooting"
 
 operations:
   resource_discovery:
