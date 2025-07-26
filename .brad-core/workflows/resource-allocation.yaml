@@ -1,0 +1,132 @@
+# Resource Allocation Workflow with Claude Service Account Integration
+name: resource-allocation
+description: "Automated infrastructure provisioning with service account setup"
+version: "1.0.0"
+
+triggers:
+  - type: "notion-update"
+    database: "projects"
+    field: "Status"
+    value: "Resource Request"
+  - type: "manual"
+    command: "@brad-master allocate-resources"
+
+stages:
+  - name: "requirements"
+    description: "Gather and validate resource requirements"
+    actions:
+      - name: "Extract Requirements"
+        agent: "notion-agent"
+        commands:
+          - get-project-details: "Retrieve project specifications"
+          - parse-resources: "Extract CPU, RAM, storage needs"
+          - validate-requirements: "Ensure requirements are complete"
+
+  - name: "provision"
+    description: "Create and configure infrastructure resources"
+    actions:
+      - name: "Check Availability"
+        agent: "pxm-manager"
+        commands:
+          - status: "Check current resource utilization"
+          - discover: "Find available capacity"
+          
+      - name: "Create Resources"
+        agent: "pxm-manager"
+        commands:
+          - allocate: "Create containers/VMs with specifications"
+          - configure-network: "Assign IPs following naming convention"
+          - mount-storage: "Attach required storage volumes"
+          
+      - name: "Setup Service Account"
+        agent: "pxm-manager"
+        commands:
+          - harden-container: "Apply security hardening script via PCT"
+          - execute: |
+              # Run container hardening script from Proxmox host
+              ssh pxm-admin@192.168.0.199 "sudo pct exec <container_id> -- bash -c 'curl -sSL <hardening_script_url> | bash'"
+          - verify-claude-account: "Test claude account SSH key auth and sudo access"
+          - verify-security: "Confirm root SSH disabled and firewall active"
+
+  - name: "configuration"
+    description: "Deploy applications and configure services"
+    actions:
+      - name: "Base Configuration"
+        agent: "pxm-manager"
+        commands:
+          - ssh-execute: "ssh claude@{ip} 'sudo apt-get update'"
+          - install-base: "Install common packages and dependencies via claude account"
+          - verify-hardening: "Confirm security hardening is active and compliant"
+          
+      - name: "Application Deployment"
+        agent: "pxm-manager"
+        commands:
+          - deploy-services: "Install and configure project-specific services"
+          - configure-apps: "Apply application settings and integrations"
+          - enable-monitoring: "Set up health checks and metrics"
+
+  - name: "finalization"
+    description: "Update documentation and provide access"
+    actions:
+      - name: "Update Notion"
+        agent: "notion-agent"
+        commands:
+          - create-resource-record: "Add to PXM Resources database with security metadata"
+          - update-security-fields: "Set standard security metadata (SSH Key Auth, Claude access, Hardened status)"
+          - update-project: "Link resources to project"
+          - document-access: "Record SSH access via claude account and security notes"
+          
+      - name: "Notify Completion"
+        agent: "brad-master"
+        commands:
+          - generate-summary: "Create provisioning report"
+          - notify-team: "Send completion notification"
+
+validation:
+  pre_stage:
+    requirements:
+      - "Project must have defined resource specifications"
+      - "Proxmox API must be accessible"
+    provision:
+      - "Sufficient resources must be available"
+      - "IP addresses must be available in range"
+    configuration:
+      - "Claude account must be verified on all resources"
+      - "SSH connectivity must be established"
+  
+  post_stage:
+    provision:
+      - "All containers/VMs must be running"
+      - "Claude service account must have sudo access"
+    configuration:
+      - "All services must be healthy"
+      - "Monitoring must be active"
+    finalization:
+      - "Notion resources database must be updated"
+      - "All access credentials must be documented"
+
+error_handling:
+  provision_failure:
+    - rollback: "Destroy partially created resources"
+    - notify: "Alert about provisioning failure"
+    - document: "Log failure reason in Notion"
+    
+  claude_setup_failure:
+    - retry: "Attempt manual PCT exec setup"
+    - fallback: "Document manual setup requirements"
+    - alert: "Notify about manual intervention needed"
+
+outputs:
+  - resource_ids: "List of created container/VM IDs"
+  - ip_addresses: "Assigned IP addresses"
+  - access_credentials: "Claude account and service credentials"
+  - notion_records: "Created database entries"
+  - provisioning_report: "Complete setup documentation"
+
+automation_benefits:
+  - "Consistent infrastructure provisioning"
+  - "Automated service account management"
+  - "Full container control via claude account"
+  - "Seamless Notion integration for tracking"
+  - "Reduced manual configuration errors"
+  - "Rapid resource deployment for projects"

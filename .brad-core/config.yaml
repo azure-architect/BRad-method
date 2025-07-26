@@ -20,8 +20,10 @@ notion:
     projects: "${NOTION_PROJECTS_DB_ID}"
     tasks: "${NOTION_TASKS_DB_ID}" 
     notes: "${NOTION_NOTES_DB_ID}"
-    resources: "${NOTION_RESOURCES_DB_ID}"     # Infrastructure resources
+    resources: "${NOTION_RESOURCES_DB_ID}"     # Infrastructure resources (PXM Resources)
     videos: "${NOTION_VIDEOS_DB_ID}"           # Video clips library
+  database_ids:
+    resources: "23cbf6e5-4d3b-81a3-ab7e-d413450cd07b"  # PXM Resources database (updated with security metadata)
   sync_interval: 30  # seconds between auto-syncs
 
 # GitHub Integration  
@@ -39,8 +41,15 @@ infrastructure:
   proxmox:
     enabled: true
     api_url: "${PROXMOX_API_URL}"
+    host_ip: "192.168.0.199"
+    host_user: "pxm-admin"  # After running proxmox-host-setup.sh
     auto_discover: true
     sync_resources_to_notion: true
+    container_hardening:
+      enabled: true
+      script: ".brad-core/scripts/container-hardening.sh"
+      service_account: "claude"
+      auto_run_on_create: true
 
 # Hook System
 hooks:

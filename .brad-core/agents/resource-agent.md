@@ -39,6 +39,50 @@ proxmox_api_config:
   ssl_verify: false  # For local/self-signed certificates
   timeout: 30  # seconds
   
+service_account_config:
+  username: "claude"
+  password: "claude"  # Stored securely in environment
+  sudo_access: "NOPASSWD:ALL"
+  purpose: "Automated container and VM management by PXM Manager"
+  capabilities:
+    - "Full sudo access on all containers"
+    - "Service deployment and configuration"
+    - "Application installation and updates"
+    - "Log collection and monitoring"
+    - "Backup operations within containers"
+    - "Network configuration management"
+  configured_resources:
+    - container_id: 116
+      name: "lxc-files-1"
+      ip: "192.168.0.116"
+      verified: true
+      hardened: true
+      security_level: "hardened"
+      access_method: "ssh_key_auth"
+      service_accounts: ["claude", "root"]
+      ssh_access: "claude"
+      user_roles: "claude: sudo access, service management, automation; root: disabled SSH, system maintenance only via console"
+    - container_id: 115
+      name: "lxc-jellyfin-1" 
+      ip: "192.168.0.115"
+      verified: true
+      hardened: true
+      security_level: "hardened"
+      access_method: "ssh_key_auth"
+      service_accounts: ["claude", "root"]
+      ssh_access: "claude"
+      user_roles: "claude: sudo access, service management, automation; root: disabled SSH, system maintenance only via console"
+    - container_id: 135
+      name: "lxc-docker-135"
+      ip: "192.168.0.135"
+      verified: true
+      hardened: true
+      security_level: "hardened"
+      access_method: "ssh_key_auth"
+      service_accounts: ["claude", "root"]
+      ssh_access: "claude"
+      user_roles: "claude: sudo access, service management, automation; root: disabled SSH, system maintenance only via console"
+  
 commands:
   - test-connectivity: Test Proxmox API connection and authentication
   - discover: Auto-discover available Proxmox resources and nodes
@@ -54,6 +98,9 @@ commands:
   - migrate: Migrate resources between Proxmox hosts
   - sync-notion: Update Notion Resources database with current state
   - cost-analysis: Generate cost reports and optimization recommendations
+  - harden-container: Apply security hardening script to new or existing containers
+  - setup-claude-account: Configure claude service account with sudo access
+  - verify-security: Check container security posture and compliance
 
 working_api_commands:
   authenticate:
@@ -74,6 +121,61 @@ working_api_commands:
       curl -s -k -X GET "https://192.168.0.199:8006/api2/json/nodes" \
         -H "Cookie: PVEAuthCookie=${TICKET}" | python3 -m json.tool
     description: "Lists all Proxmox nodes with resource usage and status"
+
+automated_container_management:
+  proxmox_host_access:
+    user: "pxm-admin"
+    password: "SSH key authentication only"
+    purpose: "Execute PCT/QM commands on Proxmox host"
+    setup_script: ".brad-core/scripts/proxmox-host-setup.sh"
+    host_ip: "192.168.0.199"
+    ssh_key_path: "~/.ssh/id_rsa" # Your Mac Studio SSH key
+    security_level: "hardened"
+    root_ssh_disabled: true
+    capabilities:
+      - "sudo pct exec - Execute commands in containers"
+      - "sudo pct create - Create new containers"
+      - "sudo pct config - Configure containers"
+      - "sudo qm - Manage virtual machines"
+      - "sudo pvesh - Access Proxmox API locally"
+    example_commands:
+      execute_in_container: 'ssh pxm-admin@192.168.0.199 "sudo pct exec 115 -- command"'
+      create_container: 'ssh pxm-admin@192.168.0.199 "sudo pct create 120 local:vztmpl/debian-12.tmpl"'
+      list_containers: 'ssh pxm-admin@192.168.0.199 "sudo pct list"'
+      container_status: 'ssh pxm-admin@192.168.0.199 "sudo pct status 115"'
+      
+  container_hardening:
+    script: ".brad-core/scripts/container-hardening.sh"
+    features:
+      - "Install sudo package (not default in Debian)"
+      - "Create claude service account with sudo"
+      - "Configure SSH key authentication"
+      - "Disable root SSH login"
+      - "Setup basic firewall rules"
+      - "Create system info file"
+    execution_methods:
+      new_container: |
+        # Run via PCT from Proxmox host
+        ssh pxm-admin@192.168.0.199 "sudo pct exec <container_id> -- bash -c 'curl -sSL https://raw.githubusercontent.com/user/repo/main/.brad-core/scripts/container-hardening.sh | bash'"
+      existing_container: |
+        # Run directly if you have root access
+        ssh root@<container_ip> 'bash -s' < .brad-core/scripts/container-hardening.sh
+        
+  service_deployment:
+    command_template: |
+      ssh claude@<container_ip> "sudo <command>"
+    examples:
+      install_package: 'ssh claude@192.168.0.116 "sudo apt-get update && sudo apt-get install -y nginx"'
+      restart_service: 'ssh claude@192.168.0.115 "sudo systemctl restart jellyfin"'
+      check_status: 'ssh claude@192.168.0.135 "sudo docker ps"'
+      
+  automated_operations:
+    - "Application deployment and configuration"
+    - "Service health checks and restarts"
+    - "Log collection and analysis"
+    - "Security updates and patches"
+    - "Backup execution within containers"
+    - "Performance monitoring setup"
 
 local_documentation_integration:
   documentation_root: "/Volumes/Samsung/mo/knowledge/docs/proxmox/"
@@ -346,6 +448,7 @@ operations:
       4. Check resource health and status
       5. Update Notion Resources database
       6. Generate resource availability report
+      7. Verify claude service account on each container
 
   resource_allocation:
     steps:
@@ -355,8 +458,9 @@ operations:
       4. Create infrastructure configuration
       5. Deploy resources using templates
       6. Configure networking and security
-      7. Update Notion with allocation details
-      8. Provide access credentials and endpoints
+      7. Setup claude service account on new resources
+      8. Update Notion with allocation details
+      9. Provide access credentials and endpoints
 
   resource_monitoring:
     metrics:
@@ -430,6 +534,35 @@ provisioning_workflows:
       5. Create backup policies
       6. Provide access documentation
 
+notion_database_integration:
+  database_id: "23cbf6e5-4d3b-81a3-ab7e-d413450cd07b"
+  workspace_id: "bd6eb337-4c7c-47c1-9321-5f8b7e2a1b4c"
+  sync_frequency: "real_time"
+  properties_mapping:
+    resource_name: "Resource Name"
+    container_id: "Container ID"
+    ip_address: "IP Address"
+    host_type: "Host Type"
+    purpose: "Purpose"
+    status: "Status"
+    cpu_cores: "CPU Cores"
+    memory_gb: "Memory (GB)"
+    storage_gb: "Storage (GB)"
+    service_accounts: "Service Accounts"
+    ssh_access: "SSH Access"
+    user_roles: "User Roles"
+    security_level: "Security Level"
+    access_methods: "Access Methods"
+    hardened: "Hardened"
+    notes: "Notes"
+  standard_security_metadata:
+    service_accounts: ["claude", "root"]
+    ssh_access: "Claude (Service Account)"
+    security_level: "Hardened"
+    access_methods: ["SSH Key Auth", "PCT Exec"]
+    user_roles: "claude: sudo access, service management, automation\\nroot: disabled SSH, system maintenance only via console"
+    hardened: true
+
 integration_points:
   notion_synchronization:
     resource_to_notion:
@@ -437,6 +570,7 @@ integration_points:
       - Status changes → Update resource status
       - Utilization metrics → Update performance data
       - Cost information → Update cost tracking
+      - Security updates → Update security metadata
     
     notion_to_resource:
       - Project creation → Trigger resource allocation
