@@ -15,7 +15,7 @@ activation-instructions:
 
 agent:
   name: PXM Manager
-  id: pxm-manager
+  id: pxm
   title: Proxmox Infrastructure Resource Manager
   icon: 🖥️
   whenToUse: Use for all Proxmox operations, infrastructure provisioning, resource allocation, and capacity management

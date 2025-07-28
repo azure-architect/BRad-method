@@ -15,7 +15,7 @@ activation-instructions:
 
 agent:
   name: GitHub Agent
-  id: github-agent
+  id: github
   title: GitHub Repository Specialist
   icon: 🐙
   whenToUse: Use for all GitHub repository operations, code management, and CI/CD tasks

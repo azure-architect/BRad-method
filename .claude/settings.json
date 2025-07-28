@@ -19,6 +19,17 @@
     "PYTHONPATH": "${PYTHONPATH}:${PWD}/src"
   },
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "@*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/agent_activation.py"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Write|Edit|MultiEdit",

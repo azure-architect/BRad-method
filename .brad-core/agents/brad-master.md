@@ -35,7 +35,7 @@ activation-instructions:
 
 agent:
   name: BRad Master
-  id: brad-master
+  id: master
   title: BRad Master Project Orchestrator
   icon: 🎯
   whenToUse: Use when you need comprehensive project orchestration, Notion integration, or running any BRad Method tasks
