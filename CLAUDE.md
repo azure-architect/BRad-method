@@ -6,6 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This repository contains a sophisticated Claude Code integration setup with automated hooks, custom slash commands, and comprehensive tooling for Python, JavaScript, PHP, and YAML development.
 
+## CRITICAL FILE ORGANIZATION RULES
+
+### Script Storage Requirements
+- **ALL Python scripts MUST be stored in the `scripts/` directory** - NEVER in the root directory
+- **ALL shell scripts MUST be stored in the `scripts/` directory** - NEVER in the root directory  
+- **ALL automation scripts MUST be stored in the `scripts/` directory** - NEVER in the root directory
+- The root directory should remain clean with only essential configuration files
+- When creating ANY script file, ALWAYS use the path `scripts/filename.py` or `scripts/filename.sh`
+- This applies to ALL agents, tasks, and workflows without exception
+
 ## Development Commands
 
 ### Python Development
@@ -78,9 +88,14 @@ Generates detailed component documentation:
 - **Security**: Prevents `os.system()` usage and other security anti-patterns
 
 ### File Organization
-- Hooks located in `.claude/hooks/` with language-specific subdirectories
-- Logs stored in `.claude/logs/` with session summaries and transcripts
-- Settings in `.claude/settings.json` and `.claude/settings.local.json`
+- **Scripts**: ALL scripts MUST be stored in `scripts/` directory (Python, Shell, etc.)
+- **Reports**: All audit reports, analysis documents in `reports/` directory
+- **Hooks**: Located in `.claude/hooks/` with language-specific subdirectories
+- **Logs**: Stored in `.claude/logs/` with session summaries and transcripts
+- **Settings**: In `.claude/settings.json` and `.claude/settings.local.json`
+- **Agent definitions**: In `.brad-core/agents/`
+- **Tasks**: In `.brad-core/tasks/`
+- **Workflows**: In `.brad-core/workflows/`
 
 ## Quality Standards
 
