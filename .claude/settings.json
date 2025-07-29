@@ -12,7 +12,8 @@
       "Bash(git *)"
     ],
     "additionalDirectories": [
-      "./docs/tasks/"
+      "./docs/tasks/",
+      "./.brad-core/bundles/"
     ]
   },
   "env": {

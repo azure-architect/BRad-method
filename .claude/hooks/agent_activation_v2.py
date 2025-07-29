@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Claude Hook: Agent Activation System V2
-Fixed version that properly reads from stdin
+Claude Hook: Agent Activation System V2 - Clean Aliases
+Fixed version with short, clean agent aliases
 """
 
 import json
@@ -158,14 +158,27 @@ def handle_agent_command(command: str, registry: AgentRegistry) -> str:
             return "No agents found in .brad-core/agents/"
 
         response = "🤖 **Available BRad Method Agents:**\n\n"
+
+        # Show clean aliases in the list
+        alias_map = {
+            "brad-master": "master",
+            "notion-agent": "notion",
+            "github-agent": "github",
+            "idea-man": "idea",
+            "project-manager-agent": "project",
+            "pxm-master": "pxm",
+            "video-ingestion-agent": "video",
+        }
+
         for i, agent in enumerate(agents, 1):
-            response += f"{i}. {agent['icon']} **{agent['name']}** (`@{agent['id']}`)\n"
+            clean_alias = alias_map.get(agent["id"], agent["id"])
+            response += f"{i}. {agent['icon']} **{agent['name']}** (`@{clean_alias}`)\n"
             response += f"   {agent['title']}\n"
             if agent["whenToUse"]:
                 response += f"   *{agent['whenToUse']}*\n"
             response += "\n"
 
-        response += "**Usage:** Type `@agent-id` to activate an agent\n"
+        response += "**Usage:** Type `@alias` to activate an agent\n"
         response += "**Example:** `@master` or `@notion`"
         return response
 
@@ -188,7 +201,7 @@ def handle_agent_command(command: str, registry: AgentRegistry) -> str:
     elif cmd.startswith("@") and len(cmd) > 1:
         agent_id = cmd[1:]  # Remove @ prefix
 
-        # Handle simplified names
+        # Clean, short aliases
         simplified_map = {
             "master": "brad-master",
             "notion": "notion-agent",
@@ -196,7 +209,7 @@ def handle_agent_command(command: str, registry: AgentRegistry) -> str:
             "idea": "idea-man",
             "project": "project-manager-agent",
             "pxm": "pxm-master",
-            "video": "video-ingestion",
+            "video": "video-ingestion-agent",
         }
 
         # Check if it's a simplified name
@@ -206,7 +219,12 @@ def handle_agent_command(command: str, registry: AgentRegistry) -> str:
         agent_data = registry.activate_agent(agent_id)
 
         if not agent_data:
-            available = [f"@{aid}" for aid in registry.agents.keys()]
+            # Show clean aliases in error message
+            available = []
+            reverse_map = {v: k for k, v in simplified_map.items()}
+            for aid in registry.agents.keys():
+                clean_alias = reverse_map.get(aid, aid)
+                available.append(f"@{clean_alias}")
             return f"❌ Agent '{agent_id}' not found. Available: {', '.join(available)}"
 
         # Generate activation response
