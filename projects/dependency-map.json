@@ -1,0 +1,238 @@
+{
+  "dependency_map": {
+    "shared_resources": {
+      "notion_databases": {
+        "projects": {
+          "id": "23abf6e5-4d3b-815a-8426-c45496d89c6d",
+          "used_by": ["brad-master", "notion-agent", "project-manager-agent"]
+        },
+        "tasks": {
+          "id": "23abf6e5-4d3b-8163-96c6-ea0a6a641ea2",
+          "used_by": ["brad-master", "notion-agent", "project-manager-agent"]
+        },
+        "notes": {
+          "id": "23bbf6e5-4d3b-81d1-beb5-e1016a65db65",
+          "used_by": ["notion-agent", "idea-man"]
+        },
+        "videos": {
+          "id": "23cbf6e5-4d3b-8190-8664-cd3ed066e6d8",
+          "used_by": ["notion-agent", "video-ingestion-agent"]
+        },
+        "resources": {
+          "id": "23cbf6e5-4d3b-81a3-ab7e-d413450cd07b",
+          "used_by": ["notion-agent", "pxm-master", "brad-master"]
+        }
+      },
+      "external_documentation": {
+        "notion-api.md": {
+          "path": "/Volumes/Samsung/mo/knowledge/docs/notion-api.md",
+          "used_by": ["brad-master", "notion-agent"]
+        },
+        "github-api.md": {
+          "path": "/Volumes/Samsung/mo/knowledge/docs/github-api.md",
+          "used_by": ["brad-master", "github-agent"]
+        }
+      },
+      "configuration_files": {
+        "config.yaml": {
+          "path": ".brad-core/config.yaml",
+          "used_by": ["brad-master"]
+        }
+      }
+    },
+    "agent_specific_dependencies": {
+      "brad-master": {
+        "tasks": [
+          ".brad-core/tasks/create-project.md",
+          ".brad-core/tasks/sync-notion-databases.md",
+          ".brad-core/tasks/provision-infrastructure.md",
+          ".brad-core/tasks/assign-project-resources.md",
+          ".brad-core/tasks/update-project-status.md"
+        ],
+        "workflows": [
+          ".brad-core/workflows/project-initiation.yaml",
+          ".brad-core/workflows/development-cycle.yaml",
+          ".brad-core/workflows/infrastructure-setup.yaml",
+          ".brad-core/workflows/resource-allocation.yaml"
+        ],
+        "templates": [
+          ".brad-core/templates/project-template.yaml",
+          ".brad-core/templates/task-template.yaml",
+          ".brad-core/templates/infrastructure-template.yaml"
+        ],
+        "hooks": [
+          ".brad-core/hooks/notion-sync.py"
+        ]
+      },
+      "github-agent": {
+        "templates": [
+          "web_app",
+          "api_service", 
+          "infrastructure"
+        ],
+        "workflows": [
+          "ci-cd-setup.yaml",
+          "release-management.yaml"
+        ],
+        "external_apis": [
+          "github-api"
+        ]
+      },
+      "idea-man": {
+        "workflows": [
+          "capture-process.yaml",
+          "content-generation.yaml"
+        ],
+        "templates": [
+          "video-script.yaml"
+        ],
+        "external_services": [
+          "speech-recognition",
+          "nlp-processing"
+        ]
+      },
+      "notion-agent": {
+        "database_schemas": {
+          "projects_schema": "Full schema embedded in agent file",
+          "tasks_schema": "Full schema embedded in agent file",
+          "notes_schema": "Full schema embedded in agent file",
+          "videos_schema": "Full schema embedded in agent file",
+          "resources_schema": "Full schema embedded in agent file"
+        }
+      },
+      "project-manager-agent": {
+        "methodologies": [
+          "agile-framework",
+          "quality-gates",
+          "risk-management"
+        ]
+      },
+      "pxm-master": {
+        "api_configuration": {
+          "proxmox_api": "https://192.168.0.199:8006/api2/json",
+          "service_account": "claude"
+        },
+        "scripts": [
+          ".brad-core/scripts/container-hardening.sh",
+          ".brad-core/scripts/proxmox-host-setup.sh"
+        ]
+      },
+      "video-ingestion-agent": {
+        "storage_configuration": {
+          "nas_paths": [
+            "/nas/video-capture/incoming",
+            "/nas/video-capture/processing", 
+            "/nas/video-capture/archive"
+          ]
+        },
+        "processing_workflows": [
+          "metadata-extraction",
+          "transcript-generation",
+          "content-analysis",
+          "johnny-decimal-categorization"
+        ]
+      }
+    },
+    "cross_agent_integrations": {
+      "notion_sync": {
+        "agents": ["brad-master", "notion-agent", "github-agent", "pxm-master", "video-ingestion-agent"],
+        "trigger_events": ["task_complete", "project_create", "resource_allocate", "repo_create"]
+      },
+      "resource_allocation": {
+        "orchestrator": "brad-master",
+        "executor": "pxm-master",
+        "tracker": "notion-agent"
+      },
+      "project_workflows": {
+        "coordinator": "project-manager-agent",
+        "participants": ["brad-master", "github-agent", "notion-agent", "pxm-master"]
+      }
+    },
+    "external_system_dependencies": {
+      "apis": {
+        "notion_api": {
+          "endpoint": "https://api.notion.com/v1/",
+          "authentication": "Bearer token required",
+          "used_by": ["brad-master", "notion-agent"]
+        },
+        "github_api": {
+          "endpoint": "https://api.github.com/",
+          "authentication": "OAuth token required",
+          "used_by": ["brad-master", "github-agent"]
+        },
+        "proxmox_api": {
+          "endpoint": "https://192.168.0.199:8006/api2/json",
+          "authentication": "API token required",
+          "used_by": ["pxm-master"]
+        }
+      },
+      "storage_systems": {
+        "nas_storage": {
+          "mount_points": [
+            "/Volumes/Samsung/mo/vid_in",
+            "/nas/video-capture/"
+          ],
+          "used_by": ["video-ingestion-agent"]
+        },
+        "knowledge_docs": {
+          "path": "/Volumes/Samsung/mo/knowledge/docs",
+          "used_by": ["brad-master", "notion-agent", "github-agent"]
+        }
+      },
+      "services": {
+        "cleanshot": {
+          "integration": "Video capture detection",
+          "used_by": ["video-ingestion-agent"]
+        },
+        "speech_recognition": {
+          "integration": "Audio transcription",
+          "used_by": ["idea-man", "video-ingestion-agent"]
+        }
+      }
+    },
+    "file_dependencies": {
+      "python_scripts": [
+        ".claude/hooks/agent_activation.py",
+        ".brad-core/hooks/notion-sync.py",
+        ".brad-core/scripts/container-hardening.sh",
+        ".brad-core/scripts/proxmox-host-setup.sh"
+      ],
+      "yaml_configurations": [
+        ".brad-core/config.yaml",
+        ".brad-core/workflows/project-initiation.yaml",
+        ".brad-core/workflows/development-cycle.yaml",
+        ".brad-core/workflows/infrastructure-setup.yaml",
+        ".brad-core/workflows/resource-allocation.yaml",
+        ".brad-core/templates/project-template.yaml",
+        ".brad-core/templates/task-template.yaml",
+        ".brad-core/templates/infrastructure-template.yaml"
+      ],
+      "markdown_tasks": [
+        ".brad-core/tasks/create-project.md",
+        ".brad-core/tasks/sync-notion-databases.md",
+        ".brad-core/tasks/provision-infrastructure.md",
+        ".brad-core/tasks/assign-project-resources.md",
+        ".brad-core/tasks/update-project-status.md",
+        ".brad-core/tasks/process-unprocessed-ideas.md",
+        ".brad-core/tasks/search-ideations.md"
+      ]
+    }
+  },
+  "bundle_requirements": {
+    "large_embeddings": [
+      "notion-agent database schemas",
+      "video-ingestion-agent workflow definitions",
+      "brad-master task collection"
+    ],
+    "external_file_references": [
+      "/Volumes/Samsung/mo/knowledge/docs/notion-api.md",
+      "/Volumes/Samsung/mo/knowledge/docs/github-api.md"
+    ],
+    "dynamic_configurations": [
+      "Notion database IDs",
+      "GitHub repository templates",
+      "Proxmox API endpoints",
+      "NAS storage paths"
+    ]
+  }
+}

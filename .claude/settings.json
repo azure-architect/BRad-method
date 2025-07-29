@@ -25,7 +25,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/agent_activation.py"
+            "command": "python .claude/hooks/agent_activation_v2.py"
           }
         ]
       }

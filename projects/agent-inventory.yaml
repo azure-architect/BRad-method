@@ -1,0 +1,469 @@
+agents:
+  brad-master:
+    id: brad-master
+    name: BRad Master
+    title: BRad Master Project Orchestrator
+    icon: 🎯
+    file_path: .brad-core/agents/brad-master.md
+    whenToUse: Use when you need comprehensive project orchestration, Notion integration, or running any BRad Method tasks
+    role: Master Project Orchestrator & BRad Method Expert
+    identity: Universal executor of all BRad-Method capabilities, directly runs any resource
+    commands:
+      - name: help
+        params: none
+        description: Show these listed commands in a numbered list
+      - name: config
+        params: none
+        description: Display current configuration and system status
+      - name: create-project
+        params: project name, description
+        description: Create new project in Notion with full setup
+      - name: sync-notion
+        params: optional database type
+        description: Synchronize data between systems and Notion
+      - name: list-projects
+        params: optional status filter
+        description: List projects with status and progress
+      - name: assign-task
+        params: task details, assignee
+        description: Create and assign tasks to team members
+      - name: provision-resources
+        params: resource requirements
+        description: Allocate infrastructure resources via PXM
+      - name: task
+        params: task name
+        description: Execute specific BRad Method task
+      - name: workflow
+        params: workflow name
+        description: Execute multi-step workflow process
+      - name: github-sync
+        params: repository name
+        description: Synchronize GitHub repositories and issues
+    dependencies:
+      databases:
+        - projects
+        - tasks
+        - resources
+      files:
+        - external_docs/notion-api.md
+        - external_docs/github-api.md
+      tasks:
+        - create-project.md
+        - sync-notion-databases.md
+        - provision-infrastructure.md
+        - assign-project-resources.md
+        - update-project-status.md
+      workflows:
+        - project-initiation.yaml
+        - development-cycle.yaml
+        - infrastructure-setup.yaml
+        - resource-allocation.yaml
+      templates:
+        - project-template.yaml
+        - task-template.yaml
+        - infrastructure-template.yaml
+      hooks:
+        - notion-sync.py
+    integrations:
+      - notion
+      - github
+      - proxmox
+
+  github-agent:
+    id: github-agent
+    name: GitHub Agent
+    title: GitHub Repository Specialist
+    icon: 🐙
+    file_path: .brad-core/agents/github-agent.md
+    whenToUse: Use for all GitHub repository operations, code management, and CI/CD tasks
+    role: GitHub Repository Operations Specialist
+    identity: Expert in GitHub API operations, repository management, and CI/CD tasks
+    commands:
+      - name: connect
+        params: none
+        description: Validate GitHub API connection and permissions
+      - name: create-repo
+        params: repo name, visibility, template
+        description: Create new repository with proper setup
+      - name: clone-repo
+        params: repository URL or name
+        description: Clone repository to local development environment
+      - name: setup-branches
+        params: repository name
+        description: Configure branch protection and workflow branches
+      - name: create-issue
+        params: title, body, labels
+        description: Create GitHub issue with proper formatting
+      - name: sync-commits
+        params: repository name
+        description: Synchronize commits and update project status
+      - name: setup-ci
+        params: repository name, workflow type
+        description: Configure CI/CD pipelines and automation
+      - name: manage-releases
+        params: version, notes
+        description: Create and manage software releases
+      - name: sync-notion
+        params: repository name
+        description: Synchronize GitHub data with Notion databases
+      - name: backup-repo
+        params: repository name
+        description: Create backup of repository and metadata
+    dependencies:
+      templates:
+        - web_app
+        - api_service
+        - infrastructure
+      workflows:
+        - ci-cd-setup.yaml
+        - release-management.yaml
+      integrations:
+        - github-api
+        - notion-sync
+        - local-development
+
+  idea-man:
+    id: idea-man
+    name: Idea-Man
+    title: Your Thinking Partner & Idea Processor
+    icon: 🧠
+    file_path: .brad-core/agents/idea-man.md
+    whenToUse: Use when you need to capture fleeting thoughts, process dictated ideas, organize insights, and transform raw thinking into structured, searchable content assets
+    role: Thinking Partner & Creativity Amplifier
+    identity: Expert organizer of spoken thoughts who captures lightning-in-a-bottle moments and transforms them into searchable, reusable content assets
+    commands:
+      - name: process
+        params: raw content or file
+        description: Transform raw ideas into structured, searchable content
+      - name: search
+        params: query terms
+        description: Find ideas and insights across processed content
+      - name: categorize
+        params: content
+        description: Organize ideas into appropriate categories and tags
+      - name: generate
+        params: content type, topic
+        description: Generate new content based on processed ideas
+      - name: browse
+        params: category or date range
+        description: Browse processed ideas by category or time period
+      - name: connect
+        params: idea IDs
+        description: Create connections between related ideas
+      - name: export
+        params: format, filter
+        description: Export ideas in various formats for external use
+      - name: stats
+        params: none
+        description: Show statistics about processed ideas and insights
+      - name: tag
+        params: content, tags
+        description: Add or modify tags for better organization
+      - name: learn
+        params: feedback
+        description: Learn from user feedback to improve processing
+    dependencies:
+      categories:
+        - insights
+        - metaphors
+        - frameworks
+        - distinctions
+        - stories
+      formats:
+        - social_posts
+        - newsletter_sections
+        - video_scripts
+        - blog_posts
+        - documentation
+      workflows:
+        - capture-process.yaml
+        - content-generation.yaml
+      integrations:
+        - speech-recognition
+        - nlp-processing
+        - knowledge-graphs
+
+  notion-agent:
+    id: notion-agent
+    name: Notion Agent
+    title: Notion Database Specialist
+    icon: 📝
+    file_path: .brad-core/agents/notion-agent.md
+    whenToUse: Use for all Notion database operations, queries, and synchronization tasks
+    role: Notion Database Operations Specialist
+    identity: Expert in Notion API operations, database management, and content synchronization
+    commands:
+      - name: connect
+        params: none
+        description: Validate connection to all configured Notion databases
+      - name: create-project
+        params: project details
+        description: Create new project entry in Projects database
+      - name: update-project
+        params: project ID, updates
+        description: Update existing project properties
+      - name: create-task
+        params: task details
+        description: Create task in Tasks database with proper linking
+      - name: complete-task
+        params: task ID
+        description: Mark task as complete and update dependencies
+      - name: create-note
+        params: note content
+        description: Add documentation to Notes database
+      - name: query-projects
+        params: filter criteria
+        description: Search and filter projects by criteria
+      - name: query-tasks
+        params: filter criteria
+        description: Find tasks by status, assignee, or project
+      - name: sync-status
+        params: none
+        description: Check synchronization status of all databases
+      - name: backup-data
+        params: database selection
+        description: Export database contents for backup
+      - name: query-resources
+        params: filter criteria
+        description: Search PXM resources by status, purpose, or container ID
+      - name: create-resource
+        params: resource details
+        description: Add new VM/container to PXM resources tracking
+      - name: update-resource
+        params: resource ID, updates
+        description: Modify resource status, configuration, or security settings
+    dependencies:
+      databases:
+        projects:
+          id: 23abf6e5-4d3b-815a-8426-c45496d89c6d
+          required_properties:
+            - Project name (title)
+            - Status (status)
+            - Priority (select)
+            - Owner (people)
+        tasks:
+          id: 23abf6e5-4d3b-8163-96c6-ea0a6a641ea2
+          required_properties:
+            - Task name (title)
+            - Status (status)
+            - Priority (select)
+            - Assignee (people)
+        notes:
+          id: 23bbf6e5-4d3b-81d1-beb5-e1016a65db65
+          required_properties:
+            - Title (title)
+            - Status (select)
+            - Key Topics (multi_select)
+        videos:
+          id: 23cbf6e5-4d3b-8190-8664-cd3ed066e6d8
+          required_properties:
+            - Title (title)
+            - Status (select)
+            - Johnny Decimal Category (select)
+        resources:
+          id: 23cbf6e5-4d3b-81a3-ab7e-d413450cd07b
+          required_properties:
+            - Resource Name (title)
+            - Status (select)
+            - Purpose (select)
+      integrations:
+        - notion-api
+        - mcp-validation
+
+  project-manager-agent:
+    id: project-manager-agent
+    name: Project Manager Agent
+    title: Project Coordination Specialist
+    icon: 📋
+    file_path: .brad-core/agents/project-manager-agent.md
+    whenToUse: Use for project orchestration, timeline management, and cross-system coordination
+    role: Project Coordination and Management Specialist
+    identity: Expert in project lifecycle management, stakeholder coordination, and delivering results through systematic approaches
+    commands:
+      - name: status
+        params: project ID
+        description: Comprehensive project status report
+      - name: coordinate
+        params: stakeholders, objective
+        description: Coordinate activities across teams and systems
+      - name: timeline
+        params: project ID, milestones
+        description: Create and manage project timelines
+      - name: resources
+        params: requirements
+        description: Assess and allocate project resources
+      - name: quality
+        params: deliverable
+        description: Quality assurance and gate reviews
+      - name: reporting
+        params: report type, audience
+        description: Generate project reports and dashboards
+      - name: escalate
+        params: issue, stakeholders
+        description: Escalate issues to appropriate stakeholders
+      - name: planning
+        params: project scope
+        description: Project planning and work breakdown
+      - name: communication
+        params: message, channels
+        description: Manage project communications
+      - name: closure
+        params: project ID
+        description: Project closure and lessons learned
+    dependencies:
+      lifecycle_phases:
+        - initiation
+        - planning
+        - execution
+        - monitoring
+        - closure
+      quality_gates:
+        - planning_gate
+        - development_gate
+        - deployment_gate
+        - closure_gate
+      integrations:
+        - cross-agent-coordination
+        - timeline-management
+        - risk-management
+
+  pxm-master:
+    id: pxm-master
+    name: PXM Manager
+    title: Proxmox Infrastructure Resource Manager
+    icon: 🖥️
+    file_path: .brad-core/agents/pxm-master.md
+    whenToUse: Use for all Proxmox operations, infrastructure provisioning, resource allocation, and capacity management
+    role: Proxmox Infrastructure Resource Management Specialist
+    identity: Expert in Proxmox VE operations, container/VM lifecycle management, and resource optimization
+    commands:
+      - name: test-connectivity
+        params: none
+        description: Test connection to Proxmox API
+      - name: discover
+        params: resource type
+        description: Discover available resources and capacity
+      - name: status
+        params: resource ID
+        description: Check status of specific resource
+      - name: list-storage
+        params: none
+        description: List available storage resources
+      - name: list-vms
+        params: filter
+        description: List virtual machines
+      - name: list-containers
+        params: filter
+        description: List LXC containers
+      - name: allocate
+        params: resource specifications
+        description: Allocate new VM or container
+      - name: deallocate
+        params: resource ID
+        description: Deallocate and cleanup resources
+      - name: monitor
+        params: resource ID
+        description: Monitor resource performance
+      - name: backup
+        params: resource ID, schedule
+        description: Configure and manage backups
+      - name: scale
+        params: resource ID, specifications
+        description: Scale resources up or down
+      - name: migrate
+        params: source, destination
+        description: Migrate VMs or containers
+      - name: sync-notion
+        params: none
+        description: Synchronize resource data with Notion
+      - name: cost-analysis
+        params: time period
+        description: Analyze resource costs and utilization
+      - name: harden-container
+        params: container ID
+        description: Apply security hardening to container
+    dependencies:
+      api_config:
+        url: https://192.168.0.199:8006/api2/json
+        host_ip: 192.168.0.199
+        service_account: claude
+      resource_types:
+        - vms
+        - containers
+        - storage
+        - networking
+      integrations:
+        - notion-resources-database
+        - container-management
+        - security-hardening
+
+  video-ingestion-agent:
+    id: video-ingestion-agent
+    name: Video Ingestion Agent
+    title: Video Capture & Production Specialist
+    icon: 🎥
+    file_path: .brad-core/agents/video-ingestion-agent.md
+    whenToUse: Use for video file processing, metadata extraction, transcript generation, content tagging, and production workflow management
+    role: Video Content Processing & Production Specialist
+    identity: Expert in automated video ingestion, metadata extraction, content analysis, and production workflow orchestration
+    commands:
+      - name: ingest-video
+        params: file path, category
+        description: Process new video file and add to Notion database
+      - name: batch-ingest
+        params: directory path
+        description: Process multiple videos from specified directory
+      - name: extract-metadata
+        params: video ID
+        description: Get technical details from video file
+      - name: generate-transcript
+        params: video ID
+        description: Create transcript from video audio
+      - name: analyze-content
+        params: video ID, options
+        description: Generate AI summary and auto-tags
+      - name: apply-jd-code
+        params: video ID, category
+        description: Assign Johnny Decimal category and code
+      - name: update-status
+        params: video ID, status
+        description: Change video processing workflow state
+      - name: validate-storage
+        params: storage path
+        description: Check network-attached storage connectivity
+      - name: create-thumbnails
+        params: video ID
+        description: Generate preview images from video
+      - name: optimize-for-web
+        params: video ID
+        description: Convert video for web delivery
+      - name: sync-to-notion
+        params: status filter
+        description: Update Notion video database with processed data
+      - name: quality-check
+        params: video ID
+        description: Assess video quality and production readiness
+    dependencies:
+      johnny_decimal_categories:
+        - "10-19 Projects"
+        - "20-29 Learning"
+        - "30-39 Ideas"
+        - "40-49 Documentation"
+        - "50-59 Demos"
+        - "60-69 Tutorials"
+        - "70-79 Archive"
+      workflow_states:
+        - Raw
+        - Processed
+        - Edited
+        - Published
+        - Archived
+      storage_paths:
+        incoming: /nas/video-capture/incoming
+        processing: /nas/video-capture/processing
+        archived: /nas/video-capture/archive
+      integrations:
+        - nas-storage
+        - cleanshot-integration
+        - ai-services
+        - notion-video-database
